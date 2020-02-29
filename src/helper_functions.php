@@ -68,3 +68,45 @@ function get_storage_adapter() : NgramSearch\StorageAdapter\StorageAdapterInterf
             throw new Exception('No Storage Adapter defined for ' . STORAGE_TYPE);
     }
 }
+
+/**
+ * Verzeichnis & Inhalt rekursiv löschen
+ */
+function rrmdir($dir) { 
+    if (!is_dir($dir)) {
+        return false;
+    }
+    array_map(
+        function($item) use ($dir) {
+            if (in_array($item, ['.', '..'])) {
+                return;
+            }
+            if(!rrmdir($dir . '/' . $item)) {
+                unlink($dir . '/' . $item);
+            }
+        },
+        scandir($dir)
+    );
+    return rmdir($dir);
+}
+
+/**
+ * Verzeichnisinhalt rekursiv löschen, Verzeichnis behalten
+ */
+function cleandir($dir) { 
+    if (!is_dir($dir)) {
+        return false;
+    }
+    array_map(
+        function($item) use ($dir) {
+            if (in_array($item, ['.', '..'])) {
+                return;
+            }
+            if(!cleandir($dir . '/' . $item)) {
+                unlink($dir . '/' . $item);
+            }
+        },
+        scandir($dir)
+    );
+    return true;
+}
