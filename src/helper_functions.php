@@ -93,7 +93,7 @@ function rrmdir($dir) {
 /**
  * Verzeichnisinhalt rekursiv löschen, Verzeichnis behalten
  */
-function cleandir($dir) { 
+function cleandir($dir, $keep = true) { 
     if (!is_dir($dir)) {
         return false;
     }
@@ -102,11 +102,14 @@ function cleandir($dir) {
             if (in_array($item, ['.', '..'])) {
                 return;
             }
-            if(!cleandir($dir . '/' . $item)) {
+            if(!cleandir($dir . '/' . $item, false)) {
                 unlink($dir . '/' . $item);
             }
         },
         scandir($dir)
     );
-    return true;
+    if ($keep) {
+        return true;
+    }
+    return rmdir($dir);
 }
