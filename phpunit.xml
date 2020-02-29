@@ -13,6 +13,7 @@
 >
     <testsuites>
         <testsuite name="Default">
+            <file>tests/StorageAdapterFilesystemTest.php</file>
             <file>tests/RequestHandlerIndexListTest.php</file>
         </testsuite>
     </testsuites>

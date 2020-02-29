@@ -62,7 +62,7 @@ function set_header(string $header, bool $replace = TRUE, int $http_response_cod
 function get_storage_adapter() : NgramSearch\StorageAdapter\StorageAdapterInterface {
     switch(STORAGE_TYPE) {
         case 'Filesystem':
-            return new NgramSearch\StorageAdapter\Filesystem();
+            return new NgramSearch\StorageAdapter\Filesystem(STORAGE_PATH);
             break;
         default:
             throw new Exception('No Storage Adapter defined for ' . STORAGE_TYPE);

@@ -6,7 +6,7 @@ function index_list($vars = []) {
     set_header('Content-type: application/json');
     echo json_encode(
         [
-            'available_indexes' => $storage::listIndexes()
+            'available_indexes' => $storage->listIndexes()
         ]
     );
 }

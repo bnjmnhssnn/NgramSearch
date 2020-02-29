@@ -3,5 +3,5 @@ namespace NgramSearch\StorageAdapter;
 
 interface StorageAdapterInterface
 {
-    public static function listIndexes() : array;     
+    public function listIndexes() : array;     
 }
