@@ -1,0 +1,27 @@
+{
+    "name": "bnjmnhssnn/ngram-search",
+    "description": "Beschreibung",
+    "authors": [
+        {
+            "name": "Benjamin Hosseinian",
+            "email": "info@benjamin-hosseinian.de"
+        }
+    ],
+    "require": {
+        "monolog/monolog": "^1.25",
+        "nikic/fast-route": "^1.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5"
+    },
+    "autoload": {
+        "psr-4": {
+          "NgramSearch\\": "src/classes/"
+        },
+        "files": ["src/helper_functions.php"]
+    },
+    "autoload-dev": {
+        "psr-4": {
+        }
+    }
+}
