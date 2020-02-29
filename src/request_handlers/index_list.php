@@ -1,9 +1,12 @@
 <?php
 function index_list($vars = []) {
+
+    $storage = get_storage_adapter();
+
     set_header('Content-type: application/json');
     echo json_encode(
         [
-            'basename' => basename(__FILE__)
+            'available_indexes' => $storage::list_indexes()
         ]
     );
 }

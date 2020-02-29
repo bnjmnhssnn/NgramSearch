@@ -9,6 +9,7 @@
         stopOnSkipped="false"
         stopOnRisky="false"
         processIsolation="true"
+        bootstrap="tests/src/bootstrap.php"
 >
     <testsuites>
         <testsuite name="Default">
