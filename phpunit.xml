@@ -8,10 +8,11 @@
         stopOnIncomplete="false"
         stopOnSkipped="false"
         stopOnRisky="false"
+        processIsolation="true"
 >
     <testsuites>
         <testsuite name="Default">
-            <file>tests/FooTest.php</file>
+            <file>tests/RequestHandlerIndexListTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
