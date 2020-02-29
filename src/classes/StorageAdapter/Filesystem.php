@@ -3,7 +3,7 @@ namespace NgramSearch\StorageAdapter;
 
 class Filesystem implements StorageAdapterInterface
 {
-    public static function list_indexes() : array
+    public static function listIndexes() : array
     {
         return array_filter(
             scandir(STORAGE_PATH),
