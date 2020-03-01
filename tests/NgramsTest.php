@@ -36,4 +36,13 @@ class NgramsTest extends TestCase {
             Ngrams::extract('one two')
         );
     }  
+
+    /**
+     * @depends testNgramExtraction
+     */
+    public function throwExceptionWhenCharIsDisallowed() : void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        Ngrams::extract('äüöê');
+    }
 }

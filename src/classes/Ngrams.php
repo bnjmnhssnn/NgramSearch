@@ -45,6 +45,8 @@ class Ngrams
             $ngram = $chars[$i] . $chars[$i + 1]; 
             if(in_array($ngram, $valid_ngrams)) {    
                 $res[] = $ngram; 
+            } else {
+                throw new \InvalidArgumentException('Ngram \'' . $ngram . '\' contains at least one disallowed char.');
             }
         }
         return array_unique($res);
