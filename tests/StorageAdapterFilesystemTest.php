@@ -22,9 +22,6 @@ class StorageAdapterFilesystemTest extends TestCase {
         $this->assertSame([], $storage_adapter->listIndexes());    
     }
 
-    /**
-     * @depends testListIndexesEmpty
-     */
     public function testCreateIndex() : void
     {
         $storage_adapter = get_storage_adapter();
@@ -34,6 +31,17 @@ class StorageAdapterFilesystemTest extends TestCase {
         $res2 = $storage_adapter->createIndex('MyIndex');
         $this->assertFalse($res2);
         $this->assertSame(Filesystem::ERROR_INDEX_NAME_INUSE, $storage_adapter->lastError()); 
+    }
+
+    /**
+     * @depends testCreateIndex
+     */
+    public function testIndexExists() : void
+    {
+        $storage_adapter = get_storage_adapter();
+        $res = $storage_adapter->createIndex('MyIndex');
+        $this->assertTrue($storage_adapter->indexExists('MyIndex')); 
+        $this->assertFalse($storage_adapter->indexExists('DoesNotExist')); 
     }
 
     /**
@@ -103,6 +111,23 @@ class StorageAdapterFilesystemTest extends TestCase {
         $storage_adapter->removeFromIndex('MyIndex', 'baz');
         $index_content = scandir(STORAGE_PATH . '/MyIndex');
         $this->assertEquals(['.', '..'], $index_content);
+    }
+
+    /**
+     * @depends testAddToIndex
+     */
+    public function testGetNgramData() : void
+    {
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->createIndex('MyIndex');
+        $storage_adapter->addToIndex('MyIndex', ['ab'], 'foo');
+        $storage_adapter->addToIndex('MyIndex', ['ab'], 'bar');
+        $storage_adapter->addToIndex('MyIndex', ['ab'], 'baz');
+        $data = $storage_adapter->getNgramData('MyIndex', 'ab');
+        $this->assertSame(3, count($data));
+        $this->assertRegexp('/^foo\|\d+$/', $data[0]);
+        $this->assertRegexp('/^bar\|\d+$/', $data[1]);
+        $this->assertRegexp('/^baz\|\d+$/', $data[2]);
     }
 
 

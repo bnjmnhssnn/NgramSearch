@@ -20,6 +20,11 @@ class Filesystem implements StorageAdapterInterface
         $this->storage_path = rtrim($storage_path, '/');
     }
 
+    public function indexExists(string $name) : bool
+    {
+        return (is_dir($this->storage_path . '/' . $name));
+    } 
+
     public function listIndexes() : array
     {
         return array_filter(
@@ -118,6 +123,20 @@ class Filesystem implements StorageAdapterInterface
         }
         return true;
     }
+
+    public function getNgramData(string $index_name, string $ngram)
+    {
+        $index_path = $this->storage_path . '/' . $index_name;
+        if (!file_exists($index_path) || !is_dir($index_path)) {
+            $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
+            return false;
+        }
+        $ngram_data_path = $index_path . '/' . $ngram;
+        if (!file_exists($ngram_data_path)) {
+            return [];
+        }
+        return file($ngram_data_path);
+    } 
 
     public function lastError()
     {
