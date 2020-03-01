@@ -48,7 +48,6 @@ class Filesystem implements StorageAdapterInterface
     public function dropIndex(string $name) : bool
     {
         if (!file_exists($this->storage_path . '/' . $name) || !is_dir($this->storage_path . '/' . $name)) {
-            #$this->last_error = 'Index \'' . $name . '\' not found.'; 
             $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
             return false;
         }
@@ -62,11 +61,16 @@ class Filesystem implements StorageAdapterInterface
 
     public function addToIndex(string $index_name, array $ngrams, string $value_to_store) : bool
     {
-        #$this->removeFromIndex($index_name, $value_to_store); // Remove existing entries with same value
+        $index_path = $this->storage_path . '/' . $index_name;
+        if (!file_exists($index_path) || !is_dir($index_path)) {
+            $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
+            return false;
+        }
+        $this->removeFromIndex($index_name, $value_to_store); // Remove existing entries with same value
         $this->last_error = NULL; // Remove the error in case the value wasn't stored before
         foreach ($ngrams as $ngram) {
-            if(!file_put_contents($this->storage_path . '/' . $index_name . '/' . $ngram, $value_to_store . '|' . time() . "\n", FILE_APPEND | LOCK_EX)) {
-                #$this->removeFromIndex($index_name, $value_to_store); // Remove existing entries with same value
+            if(!file_put_contents($index_path . '/' . $ngram, $value_to_store . '|' . time() . "\n", FILE_APPEND | LOCK_EX)) {
+                $this->removeFromIndex($index_name, $value_to_store); // Remove existing entries with same value
                 $this->last_error = self::ERROR_ADD_TO_INDEX; 
                 return false;
             }
@@ -77,33 +81,38 @@ class Filesystem implements StorageAdapterInterface
     public function removeFromIndex(string $index_name, string $value_to_remove) : bool
     {   
         $index_path = $this->storage_path . '/' . $index_name;
+        if (!file_exists($index_path) || !is_dir($index_path)) {
+            $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
+            return false;
+        }
         $dh = opendir($index_path);
-        $success = false;
+        $found = false;
         while (($file = readdir($dh)) !== false) {
             if($file === '.' || $file === '..') {
                 continue;
             }
-            $read = fopen($index_path . '/' . $file, 'r');
-            $write = fopen($index_path . '/' . $file . '.tmp', 'w');
-            $found = false;
+            $filepath = $index_path . '/' . $file;
+            $read = fopen($filepath, 'r');
+            $write = fopen($filepath . '.tmp', 'w');
             while (!feof($read)) {
-                $line = fgets($write);
-                if (explode('|', $line)[0] != $value_to_remove) {
+                $line = fgets($read);
+                if (explode('|', $line)[0] === $value_to_remove) {
                     $found = true;
-                    $success = true;
                 } else {
                     fputs($write, $line);
                 }
             }
             fclose($read); 
             fclose($write);
-            if ($found) {
-                rename($index_path . '/' . $file . '.tmp', $index_path . '/' . $file);
+            unlink($filepath);
+            if(filesize($filepath . '.tmp') > 0) {
+                rename($filepath . '.tmp', $filepath);
+            } else {
+                unlink($filepath . '.tmp');
             }
-            unlink($index_path . '/' . $file . '.tmp');
         }
         closedir($dh);
-        if(!$success) {
+        if(!$found) {
             $this->last_error = self::ERROR_VALUE_TO_REMOVE_NOT_FOUND_ON_INDEX;
             return false;   
         }

@@ -77,5 +77,35 @@ class StorageAdapterFilesystemTest extends TestCase {
         $this->assertRegexp('/^bar\|\d+$/', file(STORAGE_PATH . '/MyIndex/' . $index_content[4])[1]);
     }
 
+    /**
+     * @depends testAddToIndex
+     */
+    public function testRemoveFromIndex() : void
+    {
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->createIndex('MyIndex');
+        $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'foo');
+        $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'remove_me');
+        $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'baz');
+        $res = $storage_adapter->removeFromIndex('MyIndex', 'remove_me');
+        $this->assertTrue($res);
+        $index_content = scandir(STORAGE_PATH . '/MyIndex');
+        $ab_content = file(STORAGE_PATH . '/MyIndex/' . $index_content[2]);
+        $xy_content = file(STORAGE_PATH . '/MyIndex/' . $index_content[2]);
+        $this->assertSame(2, count($ab_content));
+        $this->assertRegexp('/^foo\|\d+$/', $ab_content[0]);
+        $this->assertRegexp('/^baz\|\d+$/', $ab_content[1]);
+        $this->assertSame(2, count($xy_content));
+        $this->assertRegexp('/^foo\|\d+$/', $xy_content[0]);
+        $this->assertRegexp('/^baz\|\d+$/', $xy_content[1]);
+
+        $storage_adapter->removeFromIndex('MyIndex', 'foo');
+        $storage_adapter->removeFromIndex('MyIndex', 'baz');
+        $index_content = scandir(STORAGE_PATH . '/MyIndex');
+        $this->assertEquals(['.', '..'], $index_content);
+    }
+
+
+
     
 }
