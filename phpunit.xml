@@ -15,6 +15,7 @@
         <testsuite name="Default">
             <file>tests/StorageAdapterFilesystemTest.php</file>
             <file>tests/PreparerTest.php</file>
+            <file>tests/NgramsTest.php</file>
             <file>tests/RequestHandlerIndexListTest.php</file>
         </testsuite>
     </testsuites>

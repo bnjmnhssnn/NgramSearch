@@ -30,12 +30,5 @@ class PreparerTest extends TestCase {
     public function testGermanUmlautPreservation() : void
     {
         $this->assertSame(['ÄÖÜ', 'äöü', 'ß'], Preparer::get('ÄÖÜ äöü ß'));
-    }
-    
-
-
-    
-
-
-    
+    }  
 }

@@ -6,11 +6,11 @@ class StorageAdapterFilesystemTest extends TestCase {
 
     protected static $storage_adapter;
 
-    public static function setUpBeforeClass() {
+    public static function setUpBeforeClass() :void {
         self::$storage_adapter = new Filesystem(realpath(__DIR__ . '/generated/filesystem/') . '/');
     }
 
-    public static function tearDownAfterClass() {
+    public static function tearDownAfterClass() : void {
         cleandir(realpath(__DIR__ . '/generated/filesystem/'));
     }
 
@@ -21,7 +21,7 @@ class StorageAdapterFilesystemTest extends TestCase {
     /**
      * @depends testListIndexesEmpty
      */
-    public function testCreateIndex() {
+    public function testCreateIndex() : void {
         $res = self::$storage_adapter->createIndex('MyIndex');
         $this->assertTrue($res); 
         $this->assertEmpty(self::$storage_adapter->lastError()); 
@@ -33,7 +33,7 @@ class StorageAdapterFilesystemTest extends TestCase {
     /**
      * @depends testCreateIndex
      */
-    public function testDropIndex() {
+    public function testDropIndex() : void {
         self::$storage_adapter->createIndex('DropMe');
         $res = self::$storage_adapter->dropIndex('DropMe');
         $this->assertTrue($res); 
