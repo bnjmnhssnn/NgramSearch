@@ -9,5 +9,9 @@ interface StorageAdapterInterface
 
     public function dropIndex(string $name) : bool;
 
+    public function addToIndex(string $index_name, array $ngrams, string $value_to_store) : bool;
+
+    public function removeFromIndex(string $index_name, string $value_to_remove) : bool; 
+
     public function lastError();
 }
