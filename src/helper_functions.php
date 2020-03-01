@@ -1,5 +1,4 @@
 <?php
-
 function log_last_error(Monolog\Logger $logger) : void {
     if(NULL !== $err = error_get_last()) {
         $err_type = array_search($err['type'], get_defined_constants());
@@ -67,49 +66,4 @@ function get_storage_adapter() : NgramSearch\StorageAdapter\StorageAdapterInterf
         default:
             throw new Exception('No Storage Adapter defined for ' . STORAGE_TYPE);
     }
-}
-
-/**
- * Verzeichnis & Inhalt rekursiv löschen
- */
-function rrmdir($dir) { 
-    if (!is_dir($dir)) {
-        return false;
-    }
-    array_map(
-        function($item) use ($dir) {
-            if (in_array($item, ['.', '..'])) {
-                return;
-            }
-            if(!rrmdir($dir . '/' . $item)) {
-                unlink($dir . '/' . $item);
-            }
-        },
-        scandir($dir)
-    );
-    return rmdir($dir);
-}
-
-/**
- * Verzeichnisinhalt rekursiv löschen, Verzeichnis behalten
- */
-function cleandir($dir, $keep = true) { 
-    if (!is_dir($dir)) {
-        return false;
-    }
-    array_map(
-        function($item) use ($dir) {
-            if (in_array($item, ['.', '..'])) {
-                return;
-            }
-            if(!cleandir($dir . '/' . $item, false)) {
-                unlink($dir . '/' . $item);
-            }
-        },
-        scandir($dir)
-    );
-    if ($keep) {
-        return true;
-    }
-    return rmdir($dir);
 }

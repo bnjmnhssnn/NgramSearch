@@ -1,5 +1,5 @@
 <?php
-function index_list($vars = []) {
+function index_list(array $vars = []) : void {
 
     $storage = get_storage_adapter();
 

@@ -18,10 +18,13 @@
         "psr-4": {
           "NgramSearch\\": "src/classes/"
         },
-        "files": ["src/helper_functions.php"]
+        "files": [
+            "src/helper_functions.php"
+        ]
     },
     "autoload-dev": {
-        "psr-4": {
-        }
+        "files": [
+            "tests/src/test_helper_functions.php"
+        ]
     }
 }
