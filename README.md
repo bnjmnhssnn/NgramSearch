@@ -1,7 +1,7 @@
 NgramSearch Headline
 ====================
 
-Lorem ipsum dolor sit amet [dummy_link]
+NgramSearch is a reasonably fast fuzzy search implementation based on [ngrams]. It is built with pure PHP and it's REST Api is inspired by Elasticsearch. 
 
 Install
 -------
@@ -36,4 +36,4 @@ Lorem ipsum dolor sit amet
 
 
 
-[dummy_link]: http://www.google.de "dummy link"
+[ngrams]: https://en.wikipedia.org/wiki/N-gram "n-grams"
