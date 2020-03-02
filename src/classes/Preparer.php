@@ -3,7 +3,7 @@ namespace NgramSearch;
 
 class Preparer
 {
-    public static function get(string $string, bool $as_array = true) : array
+    public static function get(string $string, bool $as_array = true)
     {
         $string = self::replaceAccentedChars($string);
         $word_separators = ['-', '.', ',', '&', '+', '_'];

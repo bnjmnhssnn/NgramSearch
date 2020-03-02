@@ -20,6 +20,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/{index_name}/drop', 'drop_index');
     $r->addRoute('POST', '/{index_name}/add', 'add_to_index');
     $r->addRoute('POST', '/{index_name}/remove', 'remove_from_index');
+    $r->addRoute('GET', '/{index_name}/query', 'query_index');
     /*
     $r->addRoute('GET', '/{param_name:allowed_value_1|allowed_value_1}', 'foo');
     */

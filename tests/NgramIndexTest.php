@@ -23,7 +23,7 @@ class NgramIndexTest extends TestCase {
 
     public function testInstanciation()
     {
-        $this->generateTestData('MyIndex', []);
+        generateTestData('MyIndex', []);
         $storage_adapter = get_storage_adapter();
         try {
             new NgramIndex('MyIndex', get_storage_adapter()); 
@@ -52,7 +52,7 @@ class NgramIndexTest extends TestCase {
                 'baz|1461094800'
             ]
         ];
-        $this->generateTestData('MyIndex', $test_data);   
+        generateTestData('MyIndex', $test_data);   
         $index = new NgramIndex('MyIndex', get_storage_adapter()); 
         $res = $index->query(['ab', 'bc', 'cd']);
         $this->assertSame(
@@ -75,18 +75,5 @@ class NgramIndexTest extends TestCase {
             ],
             $res
         );    
-    }
-
-    protected function generateTestData(string $index_name, array $test_data) : void
-    {
-        mkdir(STORAGE_PATH . '/' . $index_name);
-        foreach($test_data as $ngram => $lines) {
-            $filepath = STORAGE_PATH . '/' . $index_name . '/' . $ngram;
-            $fh = fopen($filepath, 'w');
-            foreach($lines as $line) {
-                fputs($fh, $line . "\n");
-            }
-            fclose($fh);
-        }
     }
 }

@@ -43,3 +43,17 @@ function cleandir(string $dir, bool $keep = true) : bool {
     }
     return rmdir($dir);
 }
+
+
+function generateTestData(string $index_name, array $test_data) : void
+{
+    mkdir(STORAGE_PATH . '/' . $index_name);
+    foreach($test_data as $ngram => $lines) {
+        $filepath = STORAGE_PATH . '/' . $index_name . '/' . $ngram;
+        $fh = fopen($filepath, 'w');
+        foreach($lines as $line) {
+            fputs($fh, $line . "\n");
+        }
+        fclose($fh);
+    }
+}

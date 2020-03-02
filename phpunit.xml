@@ -19,6 +19,7 @@
             <file>tests/NgramIndexTest.php</file>
             <file>tests/RequestHandlerIndexListTest.php</file>
             <file>tests/RequestHandlerCreateIndexTest.php</file>
+            <file>tests/RequestHandlerQueryIndexTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
