@@ -49,8 +49,6 @@ class RequestHandlerQueryIndexTest extends TestCase {
         ob_start();
         query_index(['index_name' => 'MyIndex']);
         $output = json_decode(ob_get_clean());
-
-        print_r($output);
         $this->assertContains('HTTP/1.1 200 OK', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/json', $GLOBALS['phpunit_header_jar']);
         $this->assertObjectHasAttribute('stats', $output);
