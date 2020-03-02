@@ -135,7 +135,12 @@ class Filesystem implements StorageAdapterInterface
         if (!file_exists($ngram_data_path)) {
             return [];
         }
-        return file($ngram_data_path);
+        return array_map(
+            function($item) {
+                return rtrim($item, "\n");
+            },
+            file($ngram_data_path)
+        );
     } 
 
     public function lastError()

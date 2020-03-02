@@ -4,8 +4,6 @@ use NgramSearch\StorageAdapter\Filesystem;
  
 class StorageAdapterFilesystemTest extends TestCase {
 
-    protected static $storage_adapter;
-
     public static function setUpBeforeClass() : void
     {
         cleandir(STORAGE_PATH);
