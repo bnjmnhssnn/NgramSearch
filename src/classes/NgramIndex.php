@@ -25,6 +25,7 @@ class NgramIndex
             },
             []   
         ));
+        arsort($raw_counts);
         $return_arr = [];
         foreach($raw_counts as $key => $count) {
             if($min_hits !== NULL && $count < $min_hits) {
