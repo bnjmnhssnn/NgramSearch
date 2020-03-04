@@ -20,9 +20,8 @@ class RequestHandlerQueryIndexTest extends TestCase {
         query_index(['index_name' => 'DoesNotExist', 'query_string' => 'foo']);
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 400 Bad Request', $GLOBALS['phpunit_header_jar']);
-        $this->assertContains('Content-type: application/json', $GLOBALS['phpunit_header_jar']);
-        $this->assertObjectHasAttribute('msg', $output);
-        $this->assertIsString($output->msg);
+        $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);
+        $this->assertObjectHasAttribute('errors', $output);
     }
 
 
@@ -47,9 +46,10 @@ class RequestHandlerQueryIndexTest extends TestCase {
         query_index(['index_name' => 'MyIndex', 'query_string' => 'abcd']);
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 200 OK', $GLOBALS['phpunit_header_jar']);
-        $this->assertContains('Content-type: application/json', $GLOBALS['phpunit_header_jar']);
-        $this->assertObjectHasAttribute('stats', $output);
-        $this->assertObjectHasAttribute('query_result', $output);
+        $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);
+        $this->assertObjectHasAttribute('data', $output);
+        $this->assertObjectHasAttribute('meta', $output);
+        $this->assertObjectHasAttribute('links', $output);
 
     }
 }
