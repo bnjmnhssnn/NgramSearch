@@ -4,7 +4,9 @@ use NgramSearch\CliCommand\Setup;
 use NgramSearch\CliCommand\Import;
 
 require __DIR__ . '/vendor/autoload.php';
-require __DIR__ . '/src/env.php';
+if(file_exists(__DIR__ . '/src/env.php')) {
+    require __DIR__ . '/src/env.php';
+}
 
 $application = new Application();
 
