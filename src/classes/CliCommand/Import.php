@@ -34,7 +34,7 @@ class Import extends Command
             }
         ));
         if(empty($import_files)) {
-            $output->writeln('<error>No .txt files found in /import, exit console.</error>');
+            $io->error('No .txt files found in /import, exit console.');
             exit;
         }
         $import_files['x'] = 'cancel';
@@ -60,12 +60,12 @@ class Import extends Command
         if(!$storage->createIndex($index_name)) {
             switch($storage->lastError()) {
                 case $storage::ERROR_INDEX_NAME_INUSE:
-                    $output->writeln('<error>Index already exists, exit console.</error>');
+                    $io->error('Index already exists, exit console.');
                     exit; 
                     break;
                 case $storage::ERROR_CREATE_INDEX:
                 default:
-                    $output->writeln('<error>Unknown error creating index, exit console.</error>');
+                    $io->error('Unknown error creating index, exit console.');
                     exit;
                     break;
             }
@@ -95,9 +95,9 @@ class Import extends Command
             $output->writeln($key);
             $successful++;
         }
-        $output->writeln($successful . ' lines successfully imported.');
+        $io->success($successful . ' lines successfully imported.');
         if($with_error) {
-            $output->writeln('<error>' . $with_error . ' errors.</error>');    
+            $io->error($with_error . ' errors.');    
         }
    
     }
