@@ -9,7 +9,8 @@
     ],
     "require": {
         "monolog/monolog": "^1.25",
-        "nikic/fast-route": "^1.3"
+        "nikic/fast-route": "^1.3",
+        "symfony/console": "^4.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.5"
