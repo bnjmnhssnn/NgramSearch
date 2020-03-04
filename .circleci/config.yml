@@ -48,9 +48,8 @@ jobs:
                 paths:
                     - node_modules
 
-            # prepare the database
-            - run: touch storage/testing.sqlite
-            - run: php artisan migrate --env=testing --database=sqlite_testing --force
+            # config
+            - run: php cli.php
 
             # run tests with phpunit or codecept
             - run: ./vendor/bin/phpunit --testsuite Default
