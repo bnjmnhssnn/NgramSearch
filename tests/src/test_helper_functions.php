@@ -29,7 +29,7 @@ function cleandir(string $dir, bool $keep = true) : bool {
     }
     array_map(
         function($item) use ($dir) {
-            if (in_array($item, ['.', '..'])) {
+            if (in_array($item, ['.', '..', '.gitignore'])) {
                 return;
             }
             if(!cleandir($dir . '/' . $item, false)) {
