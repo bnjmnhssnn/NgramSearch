@@ -33,7 +33,7 @@ class Ngrams
     {
         $chars = preg_split(
             '//u', 
-            $prepared_string, 
+            mb_strtolower($prepared_string), 
             -1, 
             PREG_SPLIT_NO_EMPTY
         );
