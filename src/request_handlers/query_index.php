@@ -18,7 +18,7 @@ function query_index(array $vars = []) : void {
         return;
     }
     try {
-        $query_ngrams = Ngrams::extract(Preparer::get($_GET['query_string'], false));
+        $query_ngrams = Ngrams::extract(Preparer::get($vars['query_string'], false));
     } catch (\InvalidArgumentException $e) {
         set_header("HTTP/1.1 400 Bad Request"); 
         set_header('Content-type: application/json');
@@ -38,10 +38,10 @@ function query_index(array $vars = []) : void {
     echo json_encode(
         [
             'stats' => [
-                'result_length' => count($query_res),
+                'result_length' => min(50, count($query_res)),
                 'duration' => $duration
             ],
-            'query_result' => $query_res
+            'query_result' => array_slice($query_res, 0, 50)
         ]
     ); 
     return;   

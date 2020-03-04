@@ -5,9 +5,9 @@ ini_set('display_errors', 1);
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/env.php';
 
-$logger = new Monolog\Logger('api_log');
+$logger = new Monolog\Logger('main_logger');
 $logger->pushHandler(
-    new Monolog\Handler\RotatingFileHandler(__DIR__ . '/../logs/main.log', LOGROTATE_MAX_FILES, API_LOG_LEVEL)
+    new Monolog\Handler\RotatingFileHandler(__DIR__ . '/../logs/main.log', LOGROTATE_MAX_FILES, LOG_LEVEL)
 );
 
 register_shutdown_function(function() use ($logger){
@@ -20,7 +20,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('POST', '/{index_name}/drop', 'drop_index');
     $r->addRoute('POST', '/{index_name}/add', 'add_to_index');
     $r->addRoute('POST', '/{index_name}/remove', 'remove_from_index');
-    $r->addRoute('GET', '/{index_name}/query', 'query_index');
+    $r->addRoute('GET', '/{index_name}/query/{query_string}', 'query_index');
     /*
     $r->addRoute('GET', '/{param_name:allowed_value_1|allowed_value_1}', 'foo');
     */

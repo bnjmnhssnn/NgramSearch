@@ -16,10 +16,8 @@ class RequestHandlerQueryIndexTest extends TestCase {
 
     public function testQueryNotExistingIndex() : void
     {
-        
-        $_GET['query_string'] = 'foo';
         ob_start();
-        query_index(['index_name' => 'DoesNotExist']);
+        query_index(['index_name' => 'DoesNotExist', 'query_string' => 'foo']);
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 400 Bad Request', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/json', $GLOBALS['phpunit_header_jar']);
@@ -45,9 +43,8 @@ class RequestHandlerQueryIndexTest extends TestCase {
             ]
         ];
         generateTestData('MyIndex', $test_data); 
-        $_GET['query_string'] = 'abcd';
         ob_start();
-        query_index(['index_name' => 'MyIndex']);
+        query_index(['index_name' => 'MyIndex', 'query_string' => 'abcd']);
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 200 OK', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/json', $GLOBALS['phpunit_header_jar']);
