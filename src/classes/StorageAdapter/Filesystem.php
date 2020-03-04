@@ -27,23 +27,32 @@ class Filesystem implements StorageAdapterInterface
 
     public function listIndexes() : array
     {
-        return array_filter(
-            scandir($this->storage_path),
+        return array_values(array_filter(array_map(
             function($item) {
-                return (is_dir($this->storage_path . '/' . $item) && !in_array($item, ['.', '..']));
-            }
-        );
+                if(is_dir($this->storage_path . '/' . $item) && !in_array($item, ['.', '..'])) {
+                    $ngrams = scandir($this->storage_path . '/' . $item);   
+                    return [
+                        'index_name' => $item,
+                        'ngrams' => array_values(array_filter(
+                            $ngrams,
+                            function($item) {
+                                return !in_array($item, ['.', '..']);
+                            }
+                        ))  
+                    ];
+                }
+            },
+            scandir($this->storage_path)
+        )));
     }  
     
     public function createIndex(string $name) : bool
     {
         if (file_exists($this->storage_path . '/' . $name)) {
-            #$this->last_error = 'Index Name \'' . $name . '\' already in use.'; 
             $this->last_error = self::ERROR_INDEX_NAME_INUSE; 
             return false;
         }
         if(!mkdir($this->storage_path . '/' . $name, 0777, true)) {
-            #$this->last_error = 'Error creating Index \'' . $name . '\'.';
             $this->last_error = self::ERROR_CREATE_INDEX; 
             return false; 
         }
@@ -57,7 +66,6 @@ class Filesystem implements StorageAdapterInterface
             return false;
         }
         if(!$this->rrmdir($this->storage_path . '/' . $name)) {
-            #$this->last_error = 'Error while removing Index \'' . $name . '\'.'; 
             $this->last_error = self::ERROR_DROP_INDEX; 
             return false;      
         }
