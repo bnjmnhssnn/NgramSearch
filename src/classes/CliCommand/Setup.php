@@ -3,6 +3,7 @@ namespace NgramSearch\CliCommand;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -14,7 +15,18 @@ class Setup extends Command
     {
         $this->setName('setup')
             ->setDescription('Description text goes here')
-            ->setHelp('Help text goes here');
+            ->setHelp('Help text goes here')
+            ->addOption(
+                'baseurl',
+                NULL,
+                InputOption::VALUE_REQUIRED,
+                'The app base url'
+            )->addOption(
+                'storage',
+                NULL,
+                InputOption::VALUE_REQUIRED,
+                'The storage tye (0 = Filesystem, 1 = Sqlite)'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -24,21 +36,26 @@ class Setup extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Setup your NgramSearch App');
 
-        $question = new Question('Enter base url:' . PHP_EOL, 'http://myapp.com');
-        $base_url = $helper->ask($input, $output, $question);
+        if (!$base_url = $input->getOption('baseurl')) {
+            $question = new Question('Enter base url:' . PHP_EOL, 'http://myapp.com');
+            $base_url = $helper->ask($input, $output, $question);
+        }
 
-        $storage_choices = [
-            0 => 'Filesystem',
-            1 => 'Sqlite',
-            'x' => 'cancel'
-        ];
-        $question = new ChoiceQuestion(
-            'Choose a storage type:' . PHP_EOL,
-            $storage_choices,
-            array_keys($storage_choices)
-        );
-        $question->setErrorMessage('Ungültige Eingabe');
-        $storage_choice = $helper->ask($input, $output, $question);
+        if (NULL === ($storage_choice = $input->getOption('storage'))) {
+
+            $storage_choices = [
+                0 => 'Filesystem',
+                1 => 'Sqlite',
+                'x' => 'cancel'
+            ];
+            $question = new ChoiceQuestion(
+                'Choose a storage type:' . PHP_EOL,
+                $storage_choices,
+                array_keys($storage_choices)
+            );
+            $question->setErrorMessage('Ungültige Eingabe');
+            $storage_choice = $helper->ask($input, $output, $question);
+        }
 
         if($storage_choice === 'x') {
             $output->writeln('Command canceled, exit console.');
