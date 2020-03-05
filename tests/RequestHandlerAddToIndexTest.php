@@ -56,9 +56,11 @@ class RequestHandlerAddToIndexTest extends TestCase {
             [' f', 'fo', 'oo', 'o '],
             $output->ngrams_used_for_indexing
         );
+        $ngram_dirs = scandir(STORAGE_PATH . '/MyIndex', SCANDIR_SORT_NONE);
+        sort($ngram_dirs);
         $this->assertSame(
-            ['.', '..', ' f', 'fo', 'oo', 'o '],
-            scandir(STORAGE_PATH . '/MyIndex', SCANDIR_SORT_NONE)
+            [' f', '.', '..', 'fo', 'o ', 'oo'],
+            $ngram_dirs
         );
     }
 }
