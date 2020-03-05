@@ -20,16 +20,16 @@ composer install
 
 **3. Configuration**
 
-Run the setup console command to configure your application. 
+Run the *setup* console command to configure your application. 
 
 ```sh
 php cli.php setup
 ```
-The configuration will be stored in `src/env.php`.
+The configuration will be stored in `src/env.php`
 
 **4. Create index with sample data (optional)**
 
-Run the import console command. 
+Run the *import* console command. 
 
 ```sh
 php cli.php import
