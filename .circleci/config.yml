@@ -49,7 +49,7 @@ jobs:
                     - node_modules
 
             # config
-            - run: php cli.php
+            - run: php cli.php setup --baseurl="https://foo.bar" --storage=0
 
             # run tests with phpunit or codecept
             - run: ./vendor/bin/phpunit --testsuite Default
