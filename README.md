@@ -6,19 +6,19 @@ NgramSearch is a reasonably fast fuzzy search implementation based on [ngrams]. 
 Install
 -------
 
-1. Clone from Github:
+**1. Clone from Github:**
 
 ```sh
 git clone https://github.com/bnjmnhssnn/NgramSearch.git
 ```
 
-2. Install dependencies:
+**2. Install dependencies:**
 
 ```sh
 composer install
 ```
 
-3. Configuration
+**3. Configuration**
 
 Run the setup console command to configure your application. 
 
@@ -27,7 +27,7 @@ php cli.php setup
 ```
 The configuration will be stored in `src/env.php`.
 
-4. Create index with sample data (optional)
+**4. Create index with sample data (optional)**
 
 Run the import console command. 
 
