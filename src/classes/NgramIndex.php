@@ -34,10 +34,24 @@ class NgramIndex
             $parts = explode('|', $key);
             $return_arr[] = [
                 'value' => $parts[0],
-                'ngrams_hit' => $count,
+                'ngrams_hit' => $this->hitStats($ngrams, $parts[0]),
                 'indexed_at' => $parts[1]
             ];
         }
         return $return_arr;    
+    }
+
+    protected function hitStats(array $search_ngrams, string $raw_value)
+    {
+        $value_ngrams = Ngrams::extract(Preparer::get($raw_value, false), false);
+        return array_map(
+            function ($item) use ($value_ngrams) {
+                return [
+                    'value' => $item,
+                    'pos' => join(',', array_keys($value_ngrams, $item))
+                ];
+            },    
+            array_values(array_intersect($search_ngrams, $value_ngrams))
+        );
     }
 }

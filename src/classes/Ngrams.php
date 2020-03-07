@@ -29,7 +29,7 @@ class Ngrams
         );  
     }
 
-    public static function extract(string $prepared_string) : array
+    public static function extract(string $prepared_string, bool $unique = true) : array
     {
         $chars = preg_split(
             '//u', 
@@ -49,6 +49,9 @@ class Ngrams
                 throw new \InvalidArgumentException('Ngram \'' . $ngram . '\' contains at least one disallowed char.');
             }
         }
-        return array_unique($res);
+        if($unique) {
+            return array_unique($res);
+        }
+        return $res;
     }
 }
