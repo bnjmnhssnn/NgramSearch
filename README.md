@@ -1,7 +1,7 @@
 NgramSearch
 ===========
 
-NgramSearch is a reasonably fast fuzzy search implementation based on [ngrams]. It is built with pure PHP and it's REST Api is inspired by Elasticsearch. 
+NgramSearch is a reasonably fast fuzzy search implementation based on [ngrams]. It is built with pure PHP and it's REST Api is inspired by Elasticsearch. There is also a [demo frontend] with 15000 indexed products (currently in german).
 
 ![PHP Composer](https://github.com/bnjmnhssnn/NgramSearch/workflows/PHP%20Composer/badge.svg)
 [![bnjmnhssnn](https://circleci.com/gh/bnjmnhssnn/NgramSearch.svg?style=shield)](https://circleci.com/gh/bnjmnhssnn/NgramSearch)
@@ -50,5 +50,6 @@ Lorem ipsum dolor sit amet
 
 
 
-
+[demo frontend]: http://ngram-search-demo.benjamin-hosseinian.de 
+[demo frontend repo]: https://github.com/bnjmnhssnn/NgramSearchDemo
 [ngrams]: https://en.wikipedia.org/wiki/N-gram "n-grams"
