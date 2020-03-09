@@ -5,7 +5,8 @@ use NgramSearch\NgramIndex;
 
 function query_index(array $vars = []) : void 
 {
-    $min_hits = 2;
+    $min_hits = (!empty($_GET['min_hits'])) ? $_GET['min_hits'] : 2; 
+    $max_results = (!empty($_GET['max_results'])) ? $_GET['max_results'] : 20;
 
     try {
         $index = new NgramIndex($vars['index_name'], get_storage_adapter()); 
@@ -46,7 +47,7 @@ function query_index(array $vars = []) : void
         return;
     }
     $time_start = microtime(true);
-    $query_res = $index->query($query_ngrams, 20, 2);
+    $query_res = $index->query($query_ngrams, $max_results, $min_hits);
     $time_end = microtime(true);
     $duration = $time_end - $time_start;
     set_header("HTTP/1.1 200 OK"); 

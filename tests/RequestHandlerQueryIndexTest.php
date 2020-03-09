@@ -28,18 +28,32 @@ class RequestHandlerQueryIndexTest extends TestCase {
     public function testQueryIndex() : void
     {
         $test_data = [
+            ' a' => [
+                'abcd|1461094800',
+                'abc|1461094800',
+                'ab|1461094800',
+            ],
             'ab' => [
-                'baz|1461094800'
+                'abcd|1461094800',
+                'abc|1461094800',
+                'ab|1461094800',
             ],
             'bc' => [
-                'bar|1461094800',
-                'baz|1461094800'
+                'abcd|1461094800',
+                'abc|1461094800',
             ],
             'cd' => [
-                'foo|1461094800',
-                'bar|1461094800',
-                'baz|1461094800'
-            ]
+                'abcd|1461094800',
+            ],
+            'b ' => [
+                'ab|1461094800',
+            ],
+            'c ' => [
+                'abc|1461094800',
+            ],
+            'd ' => [
+                'abcd|1461094800',
+            ],
         ];
         generateTestData('MyIndex', $test_data); 
         ob_start();
@@ -50,6 +64,127 @@ class RequestHandlerQueryIndexTest extends TestCase {
         $this->assertObjectHasAttribute('data', $output);
         $this->assertObjectHasAttribute('meta', $output);
         $this->assertObjectHasAttribute('links', $output);
+        $this->assertSame(
+            [
+                [
+                    'value' => 'abcd',
+                    'ngrams_hit' => [
+                        ['value' => ' a', 'pos' => '0'],
+                        ['value' => 'ab', 'pos' => '1'],
+                        ['value' => 'bc', 'pos' => '2'],
+                        ['value' => 'cd', 'pos' => '3'],
+                        ['value' => 'd ', 'pos' => '4']
+                    ],
+                    'indexed_at' => '1461094800'
+                ],
+                [
+                    'value' => 'abc',
+                    'ngrams_hit' => [
+                        ['value' => ' a', 'pos' => '0'],
+                        ['value' => 'ab', 'pos' => '1'],
+                        ['value' => 'bc', 'pos' => '2']
+                    ],
+                    'indexed_at' => '1461094800'
+                ],
+                [
+                    'value' => 'ab',
+                    'ngrams_hit' => [
+                        ['value' => ' a', 'pos' => '0'],
+                        ['value' => 'ab', 'pos' => '1'],
+                    ],
+                    'indexed_at' => '1461094800'
+                ]
+            ],
+            json_decode(json_encode($output->data), true)
+        ); 
+    }
 
+    /**
+     * @depends testQueryIndex
+     */
+    public function testInterruptedMatch()
+    {
+        $test_data = [
+            ' a' => [
+                'abcde|1461094800',
+            ],
+            'ab' => [
+                'abcde|1461094800',
+            ],
+            'bc' => [
+                'abcde|1461094800',
+            ],
+            'cd' => [
+                'abcde|1461094800',
+            ],
+            'de' => [
+                'abcde|1461094800',
+            ],
+            'e ' => [
+                'abcde|1461094800',
+            ],
+        ];
+        generateTestData('MyIndex', $test_data);   
+        ob_start();
+        query_index(['index_name' => 'MyIndex', 'query_string' => 'abXde']);
+        $output = json_decode(ob_get_clean());
+        $this->assertSame(
+            [
+                [
+                    'value' => 'abcde',
+                    'ngrams_hit' => [
+                        ['value' => ' a', 'pos' => '0'],
+                        ['value' => 'ab', 'pos' => '1'],
+                        ['value' => 'de', 'pos' => '4'],
+                        ['value' => 'e ', 'pos' => '5'],    
+                    ],
+                    'indexed_at' => '1461094800'
+                ]
+            ],
+            json_decode(json_encode($output->data), true)
+        );    
+    }
+
+    /**
+     * @depends testQueryIndex
+     */
+    public function testInterruptedMatch2()
+    {
+        $test_data = [
+            ' a' => [
+                'abde|1461094800',
+            ],
+            'ab' => [
+                'abde|1461094800',
+            ],
+            'bd' => [
+                'abde|1461094800',
+            ],
+            'de' => [
+                'abde|1461094800',
+            ],
+            'e ' => [
+                'abde|1461094800',
+            ],
+        ];
+        generateTestData('MyIndex', $test_data);   
+        ob_start();
+        query_index(['index_name' => 'MyIndex', 'query_string' => 'abcde']);
+        $output = json_decode(ob_get_clean());
+        $this->assertSame(
+            [
+                [
+                    'value' => 'abde',
+                    'ngrams_hit' => [
+                        ['value' => ' a', 'pos' => '0'],
+                        ['value' => 'ab', 'pos' => '1'],
+                        ['value' => 'de', 'pos' => '3'],
+                        ['value' => 'e ', 'pos' => '4'],    
+                    ],
+                    'indexed_at' => '1461094800'
+                ]
+            ],
+            json_decode(json_encode($output->data), true)
+        );    
     }
 }
