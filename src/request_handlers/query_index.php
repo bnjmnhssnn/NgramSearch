@@ -52,18 +52,21 @@ function query_index(array $vars = []) : void
     $duration = $time_end - $time_start;
     set_header("HTTP/1.1 200 OK"); 
     set_header('Content-type: application/vnd.api+json');
-    echo json_encode(
-        [
-            'data' => prepare_result($query_res, $query_ngrams, $min_hits), 
-            'meta' => [
-                'result_length' => min(50, count($query_res)),
-                'duration' => $duration
-            ],
-            'links' => [
-                'self' => '/' . $vars['index_name'] . '/query/' . $vars['query_string'],
-            ]
+    $response_array = 
+    [
+        'data' => prepare_result($query_res, $query_ngrams, $min_hits), 
+        'meta' => [
+            'result_length' => min(50, count($query_res)),
+            'duration' => $duration,
+        ],
+        'links' => [
+            'self' => '/' . $vars['index_name'] . '/query/' . $vars['query_string'],
         ]
-    );
+    ];
+    if(defined('SERVER_INFO')) {
+        $response_array['meta']['server_info'] = SERVER_INFO;   
+    }
+    echo json_encode($response_array);
     return;   
 }
 
