@@ -64,51 +64,40 @@ class StorageAdapterFilesystemTest extends TestCase {
     {
         $storage_adapter = get_storage_adapter();
         $storage_adapter->createIndex('MyIndex');
-        $res = $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'foo');
+
+        $res = $storage_adapter->addToIndex('MyIndex', 'abc;foo');
         $this->assertTrue($res);
         $this->assertEmpty($storage_adapter->lastError());
-        $index_content = scandir(STORAGE_PATH . '/MyIndex');
-        $this->assertEquals(['.', '..', 'ab', 'xy'], $index_content);
-        foreach($index_content as $ngram_data_file) {
-            if(!in_array($ngram_data_file, ['.', '..'])) {
-                $this->assertRegexp('/^foo\|\d+$/', file(STORAGE_PATH . '/MyIndex/' . $ngram_data_file)[0]);
-            }
-        }
-        $res2 = $storage_adapter->addToIndex('MyIndex', ['xy', 'ww'], 'bar');
+        $index_content = scandir(STORAGE_PATH . '/MyIndex/ngrams');
+        $expected_content = ['.', '..', ' a', 'ab', 'bc', 'c '];
+        sort($index_content);
+        sort($expected_content);
+        $this->assertSame($expected_content, $index_content);
+
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ a')[0]);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ab')[0]);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/bc')[0]);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/c ')[0]);
+        $this->assertSame("abc;foo\n", file(STORAGE_PATH . '/MyIndex/key_value_pairs.txt')[0]);
+
+        $res2 = $storage_adapter->addToIndex('MyIndex', 'bcd;bar');
         $this->assertTrue($res2);
         $this->assertEmpty($storage_adapter->lastError());
-        $index_content = scandir(STORAGE_PATH . '/MyIndex');
-        $this->assertEquals(['.', '..', 'ab', 'ww', 'xy'], $index_content);
-        $this->assertRegexp('/^foo\|\d+$/', file(STORAGE_PATH . '/MyIndex/' . $index_content[4])[0]);
-        $this->assertRegexp('/^bar\|\d+$/', file(STORAGE_PATH . '/MyIndex/' . $index_content[4])[1]);
-    }
+        $index_content = scandir(STORAGE_PATH . '/MyIndex/ngrams');
+        $expected_content = ['.', '..', ' a', ' b', 'ab', 'bc', 'cd', 'c ', 'd '];
+        sort($index_content);
+        sort($expected_content);
+        $this->assertSame($expected_content, $index_content);
 
-    /**
-     * @depends testAddToIndex
-     */
-    public function testRemoveFromIndex() : void
-    {
-        $storage_adapter = get_storage_adapter();
-        $storage_adapter->createIndex('MyIndex');
-        $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'foo');
-        $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'remove_me');
-        $storage_adapter->addToIndex('MyIndex', ['ab', 'xy'], 'baz');
-        $res = $storage_adapter->removeFromIndex('MyIndex', 'remove_me');
-        $this->assertTrue($res);
-        $index_content = scandir(STORAGE_PATH . '/MyIndex');
-        $ab_content = file(STORAGE_PATH . '/MyIndex/' . $index_content[2]);
-        $xy_content = file(STORAGE_PATH . '/MyIndex/' . $index_content[2]);
-        $this->assertSame(2, count($ab_content));
-        $this->assertRegexp('/^foo\|\d+$/', $ab_content[0]);
-        $this->assertRegexp('/^baz\|\d+$/', $ab_content[1]);
-        $this->assertSame(2, count($xy_content));
-        $this->assertRegexp('/^foo\|\d+$/', $xy_content[0]);
-        $this->assertRegexp('/^baz\|\d+$/', $xy_content[1]);
-
-        $storage_adapter->removeFromIndex('MyIndex', 'foo');
-        $storage_adapter->removeFromIndex('MyIndex', 'baz');
-        $index_content = scandir(STORAGE_PATH . '/MyIndex');
-        $this->assertEquals(['.', '..'], $index_content);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ a')[0]);
+        $this->assertSame("2\n", file(STORAGE_PATH . '/MyIndex/ngrams/ b')[0]);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ab')[0]);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/bc')[0]);
+        $this->assertSame("2\n", file(STORAGE_PATH . '/MyIndex/ngrams/bc')[1]);
+        $this->assertSame("2\n", file(STORAGE_PATH . '/MyIndex/ngrams/cd')[0]);
+        $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/c ')[0]); 
+        $this->assertSame("2\n", file(STORAGE_PATH . '/MyIndex/ngrams/d ')[0]);
+        $this->assertSame("bcd;bar\n", file(STORAGE_PATH . '/MyIndex/key_value_pairs.txt')[1]);
     }
 
     /**
@@ -118,17 +107,27 @@ class StorageAdapterFilesystemTest extends TestCase {
     {
         $storage_adapter = get_storage_adapter();
         $storage_adapter->createIndex('MyIndex');
-        $storage_adapter->addToIndex('MyIndex', ['ab'], 'foo');
-        $storage_adapter->addToIndex('MyIndex', ['ab'], 'bar');
-        $storage_adapter->addToIndex('MyIndex', ['ab'], 'baz');
+        $storage_adapter->addToIndex('MyIndex', 'ab;foo');
+        $storage_adapter->addToIndex('MyIndex', 'ab;bar');
+        $storage_adapter->addToIndex('MyIndex', 'ab;baz');
         $data = $storage_adapter->getNgramData('MyIndex', 'ab');
         $this->assertSame(3, count($data));
-        $this->assertRegexp('/^foo\|\d+$/', $data[0]);
-        $this->assertRegexp('/^bar\|\d+$/', $data[1]);
-        $this->assertRegexp('/^baz\|\d+$/', $data[2]);
+        $this->assertSame(1, $data[0]);
+        $this->assertSame(2, $data[1]);
+        $this->assertSame(3, $data[2]);
     }
 
-
-
-    
+    /**
+     * @depends testAddToIndex
+     */
+    public function testGetKeyValuePair() : void
+    {
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->createIndex('MyIndex');
+        $storage_adapter->addToIndex('MyIndex', 'ab;foo');
+        $this->assertSame(
+            ['ab', 'foo'],
+            $storage_adapter->getKeyValuePair('MyIndex', 1)
+        );
+    } 
 }

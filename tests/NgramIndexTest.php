@@ -23,7 +23,7 @@ class NgramIndexTest extends TestCase {
 
     public function testInstanciation()
     {
-        generateTestData('MyIndex', []);
+        generateTestData('MyIndex', [], []);
         $storage_adapter = get_storage_adapter();
         try {
             new NgramIndex('MyIndex', get_storage_adapter()); 
@@ -38,53 +38,46 @@ class NgramIndexTest extends TestCase {
      */
     public function testQuery()
     {
-        $test_data = [
-            ' a' => [
-                'abcd|1461094800',
-                'abc|1461094800',
-                'ab|1461094800',
-            ],
-            'ab' => [
-                'abcd|1461094800',
-                'abc|1461094800',
-                'ab|1461094800',
-            ],
-            'bc' => [
-                'abcd|1461094800',
-                'abc|1461094800',
-            ],
-            'cd' => [
-                'abcd|1461094800',
-            ],
-            'b ' => [
-                'ab|1461094800',
-            ],
-            'c ' => [
-                'abc|1461094800',
-            ],
-            'd ' => [
-                'abcd|1461094800',
-            ],
+        $test_ngram_data = [
+            ' a' => [1, 2, 3],
+            'ab' => [1, 2, 3],
+            'bc' => [1, 2],
+            'cd' => [1],
+            'b ' => [3],
+            'c ' => [2],
+            'd ' => [1]
         ];
-        generateTestData('MyIndex', $test_data);   
+        $test_key_value_pairs = [
+            'abcd;foo',
+            'abc;bar',
+            'ab;baz',
+        ];
+        generateTestData('MyIndex', $test_ngram_data, $test_key_value_pairs);
         $index = new NgramIndex('MyIndex', get_storage_adapter()); 
-        $res = $index->query([' a', 'ab', 'bc', 'cd', 'd ' ]);
+        $res = $index->query('abcd');
         $this->assertSame(
             [
                 [
-                    'value' => 'abcd',
-                    'indexed_at' => '1461094800'
+                    'id' => 1,
+                    'key' => 'abcd',
+                    'value' => 'foo',
+                    'ngrams_hit' => 5
                 ],
                 [
-                    'value' => 'abc',
-                    'indexed_at' => '1461094800'
+                    'id' => 2,
+                    'key' => 'abc',
+                    'value' => 'bar',
+                    'ngrams_hit' => 3
                 ],
                 [
-                    'value' => 'ab',
-                    'indexed_at' => '1461094800'
-                ]
+                    'id' => 3,
+                    'key' => 'ab',
+                    'value' => 'baz',
+                    'ngrams_hit' => 2
+                ],
             ],
             $res
-        );    
+        ); 
+   
     }
 }

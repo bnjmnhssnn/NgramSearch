@@ -13,8 +13,9 @@ class NgramIndex
         $this->storage_adapter = $storage_adapter;
     }
 
-    public function query(array $ngrams, int $max_count = NULL, int $min_hits = NULL) : array
+    public function query(string $query_string, int $max_count = NULL, int $min_hits = NULL) : array
     {
+        $ngrams = Ngrams::extract(Preparer::get($query_string, false));
         $raw_counts = array_count_values(array_reduce(
             $ngrams,
             function($carry, $ngram) {
@@ -26,19 +27,21 @@ class NgramIndex
             []   
         ));
         arsort($raw_counts);
-        if($max_count !== NULL) {
-            $raw_counts = array_slice($raw_counts, 0, $max_count);
-        }
         $return_arr = [];
-        foreach($raw_counts as $key => $count) {
+        foreach($raw_counts as $id => $count) {
             if($min_hits !== NULL && $count < $min_hits) {
                 continue;
             }
-            $parts = explode('|', $key);
+            $key_value_pair = $this->storage_adapter->getKeyValuePair($this->name, $id);
             $return_arr[] = [
-                'value' => $parts[0],
-                'indexed_at' => $parts[1]
+                'id' => $id,
+                'key' => $key_value_pair[0],
+                'value' => $key_value_pair[1],
+                'ngrams_hit' => $count
             ];
+            if($max_count !== NULL && count($return_arr) === $max_count) {
+                return $return_arr;
+            }
         }
         return $return_arr;
     }
