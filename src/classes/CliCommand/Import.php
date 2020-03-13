@@ -82,17 +82,11 @@ class Import extends Command
                 $with_error++;
                 continue;    
             }
-            try {
-                $key_ngrams = Ngrams::extract(Preparer::get($key, false));
-            } catch (\InvalidArgumentException $e) {
-                $with_error++;
-                continue;
-            }
-            if(!$storage->addToIndex($index_name, $key_ngrams, rtrim($value, "\n"))) {
+            if(!$storage->addToIndex($index_name, rtrim($line, "\n"))) {
                 $with_error++;
                 continue;   
             }
-            $output->writeln($key);
+            $output->writeln($line);
             $successful++;
         }
         $io->success($successful . ' lines successfully imported.');

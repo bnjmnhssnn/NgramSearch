@@ -57,8 +57,6 @@ function prepare_result(array $query_res, string $query_string) : array
     return array_map(
         function($item) use ($search_ngrams) { 
             $key_ngrams = Ngrams::extract(Preparer::get($item['key'], false), false); 
-            
-            
             $item['ngram_details'] = array_map(
                 function ($item) use ($search_ngrams, $key_ngrams) {
                     return [

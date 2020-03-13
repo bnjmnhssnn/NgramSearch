@@ -2,19 +2,15 @@
 namespace NgramSearch\StorageAdapter;
 
 use NgramSearch\Ngrams;
+use NgramSearch\Preparer;
+use NgramSearch\Exception\DropIndexException;
+use NgramSearch\Exception\AddToIndexException;
+use NgramSearch\Exception\CreateIndexException;
+use NgramSearch\Exception\IndexNotFoundException;
+use NgramSearch\Exception\IndexNameInUseException;
 
 class Filesystem implements StorageAdapterInterface
 {
-    protected $last_error;
-
-    const ERROR_INDEX_NAME_INUSE = 0;
-    const ERROR_CREATE_INDEX = 1;
-    const ERROR_INDEX_NOT_FOUND = 2;
-    const ERROR_DROP_INDEX = 3;
-    const ERROR_ADD_TO_INDEX = 4;
-    const ERROR_INVALID_KEY_VALUE_PAIR = 5;
-    const ERROR_VALUE_TO_REMOVE_NOT_FOUND_ON_INDEX = 6;
-
     public function __construct(string $storage_path)
     {
         if(!is_dir($storage_path)) {
@@ -49,76 +45,61 @@ class Filesystem implements StorageAdapterInterface
         )));
     }  
     
-    public function createIndex(string $name) : bool
+    public function createIndex(string $name) : void
     {
         if (file_exists($this->storage_path . '/' . $name)) {
-            $this->last_error = self::ERROR_INDEX_NAME_INUSE; 
-            return false;
+            throw new IndexNameInUseException('Index name \'' . $name . '\' already in use.'); 
         }
         if(!mkdir($this->storage_path . '/' . $name, 0777, true)) {
-            $this->last_error = self::ERROR_CREATE_INDEX; 
-            return false; 
+            throw new CreateIndexException('Could not create index dir.');  
         }
         if(!mkdir($this->storage_path . '/' . $name . '/ngrams')) {
-            $this->last_error = self::ERROR_CREATE_INDEX; 
-            return false; 
+            throw new CreateIndexException('Could not create index subdir \'ngrams\'.'); 
         }
         if(!touch($this->storage_path . '/' . $name . '/key_value_pairs.txt')) {
-            $this->last_error = self::ERROR_CREATE_INDEX; 
-            return false; 
+            throw new CreateIndexException('Could not create file \'key_value_pairs.txt\'.');  
         }
-        return true;
     }
     
-    public function dropIndex(string $name) : bool
+    public function dropIndex(string $name) : void
     {
-        if (!file_exists($this->storage_path . '/' . $name) || !is_dir($this->storage_path . '/' . $name)) {
-            $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
-            return false;
+        if (!file_exists($this->storage_path . '/' . $name)) {
+            throw new IndexNotFoundException('Index \'' . $name . '\' not found.'); 
         }
         if(!$this->rrmdir($this->storage_path . '/' . $name)) {
-            $this->last_error = self::ERROR_DROP_INDEX; 
-            return false;      
+            throw new DropIndexException('Index \'' . $name . '\' could not be removed.');     
         }
-        return true;
     }
 
-
-    public function addToIndex(string $index_name, string $key_value_pair) : bool
+    public function addToIndex(string $index_name, string $key_value_pair) : void
     {
         $parts = explode(';', $key_value_pair);
         if(count($parts) !== 2) {
-            $this->last_error = self::ERROR_INVALID_KEY_VALUE_PAIR; 
-            return false;   
+            throw new \InvalidArgumentException('Argument 2 \'$key_value_pair\' could not be splitted.');  
         }
-        $ngrams = Ngrams::extract($parts[0]);
+        $ngrams = Ngrams::extract(Preparer::get($parts[0], false));
         $index_path = $this->storage_path . '/' . $index_name;
         if (!file_exists($index_path) || !is_dir($index_path)) {
-            $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
-            return false;
+            throw new IndexNotFoundException('Index \'' . $name . '\' not found.'); 
         }
         if(!file_put_contents($index_path . '/key_value_pairs.txt', $key_value_pair . "\n", FILE_APPEND | LOCK_EX)) {
-            $this->last_error = self::ERROR_ADD_TO_INDEX; 
-            return false;
+            throw new AddToIndexException('Could not write to file \'key_value_pairs.txt\'.'); 
         }
         $values_file = new \SplFileObject($index_path . '/key_value_pairs.txt', 'r');
         $values_file->seek(PHP_INT_MAX);
         $new_value_id = $values_file->key();
         foreach ($ngrams as $ngram) {
             if(!file_put_contents($index_path . '/ngrams/' . $ngram, $new_value_id . "\n", FILE_APPEND | LOCK_EX)) {
-                $this->last_error = self::ERROR_ADD_TO_INDEX; 
-                return false;
+                throw new AddToIndexException('Could not write to ngram data file \'' . $ngram . '\'.'); 
             }
         }
-        return true;
     }
 
-    public function getNgramData(string $index_name, string $ngram)
+    public function getNgramData(string $index_name, string $ngram) : array
     {
         $index_path = $this->storage_path . '/' . $index_name;
         if (!file_exists($index_path) || !is_dir($index_path)) {
-            $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
-            return false;
+            throw new IndexNotFoundException('Index \'' . $name . '\' not found.');  
         }
         $ngram_data_path = $index_path . '/ngrams/' . $ngram;
         if (!file_exists($ngram_data_path)) {
@@ -132,7 +113,7 @@ class Filesystem implements StorageAdapterInterface
         );
     } 
 
-    public function getKeyValuePair(string $index_name, int $id)
+    public function getKeyValuePair(string $index_name, int $id) : array
     {
         $values_file = new \SplFileObject($this->storage_path . '/' . $index_name . '/key_value_pairs.txt', 'r');
         $values_file->seek($id - 1);
@@ -142,11 +123,6 @@ class Filesystem implements StorageAdapterInterface
             },
             preg_split('/;|\|/', $values_file->current())
         );
-    }
-
-    public function lastError()
-    {
-        return $this->last_error;
     }
 
     protected function rrmdir($dir) { 

@@ -1,6 +1,8 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use NgramSearch\StorageAdapter\Filesystem;
+use NgramSearch\Exception\IndexNameInUseException;
+use NgramSearch\Exception\IndexNotFoundException;
  
 class StorageAdapterFilesystemTest extends TestCase {
 
@@ -14,21 +16,24 @@ class StorageAdapterFilesystemTest extends TestCase {
         cleandir(STORAGE_PATH);
     }
 
-    public function testListIndexesEmpty()
-    {
-        $storage_adapter = get_storage_adapter();
-        $this->assertSame([], $storage_adapter->listIndexes());    
-    }
-
     public function testCreateIndex() : void
     {
         $storage_adapter = get_storage_adapter();
-        $res = $storage_adapter->createIndex('MyIndex');
-        $this->assertTrue($res); 
-        $this->assertEmpty($storage_adapter->lastError()); 
-        $res2 = $storage_adapter->createIndex('MyIndex');
-        $this->assertFalse($res2);
-        $this->assertSame(Filesystem::ERROR_INDEX_NAME_INUSE, $storage_adapter->lastError()); 
+        $storage_adapter->createIndex('MyIndex');
+        $this->assertTrue(file_exists(STORAGE_PATH . '/MyIndex'));
+        $this->assertTrue(file_exists(STORAGE_PATH . '/MyIndex/ngrams'));
+        $this->assertTrue(file_exists(STORAGE_PATH . '/MyIndex/key_value_pairs.txt'));
+    }
+
+    /**
+     * @depends testCreateIndex
+     */
+    public function testCreateDuplicateIndexThrowsException() : void
+    {
+        $this->expectException(IndexNameInUseException::class);
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->createIndex('MyIndex');
+        $storage_adapter->createIndex('MyIndex');    
     }
 
     /**
@@ -37,7 +42,7 @@ class StorageAdapterFilesystemTest extends TestCase {
     public function testIndexExists() : void
     {
         $storage_adapter = get_storage_adapter();
-        $res = $storage_adapter->createIndex('MyIndex');
+        $storage_adapter->createIndex('MyIndex');
         $this->assertTrue($storage_adapter->indexExists('MyIndex')); 
         $this->assertFalse($storage_adapter->indexExists('DoesNotExist')); 
     }
@@ -49,12 +54,18 @@ class StorageAdapterFilesystemTest extends TestCase {
     {
         $storage_adapter = get_storage_adapter();
         $storage_adapter->createIndex('DropMe');
-        $res = $storage_adapter->dropIndex('DropMe');
-        $this->assertTrue($res); 
-        $this->assertEmpty($storage_adapter->lastError()); 
-        $res2 = $storage_adapter->dropIndex('DoesNotExist');
-        $this->assertFalse($res2);
-        $this->assertSame(Filesystem::ERROR_INDEX_NOT_FOUND, $storage_adapter->lastError()); 
+        $storage_adapter->dropIndex('DropMe');
+        $this->assertFalse(file_exists(STORAGE_PATH . '/DropMe')); 
+    }
+
+    /**
+     * @depends testDropIndex
+     */
+    public function testDropInexistingIndexThrowsException() : void
+    {
+        $this->expectException(IndexNotFoundException::class);
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->dropIndex('DoesNotExist');  
     }
 
     /**
@@ -65,30 +76,24 @@ class StorageAdapterFilesystemTest extends TestCase {
         $storage_adapter = get_storage_adapter();
         $storage_adapter->createIndex('MyIndex');
 
-        $res = $storage_adapter->addToIndex('MyIndex', 'abc;foo');
-        $this->assertTrue($res);
-        $this->assertEmpty($storage_adapter->lastError());
+        $storage_adapter->addToIndex('MyIndex', 'abc;foo');
         $index_content = scandir(STORAGE_PATH . '/MyIndex/ngrams');
         $expected_content = ['.', '..', ' a', 'ab', 'bc', 'c '];
         sort($index_content);
         sort($expected_content);
         $this->assertSame($expected_content, $index_content);
-
         $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ a')[0]);
         $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ab')[0]);
         $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/bc')[0]);
         $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/c ')[0]);
         $this->assertSame("abc;foo\n", file(STORAGE_PATH . '/MyIndex/key_value_pairs.txt')[0]);
 
-        $res2 = $storage_adapter->addToIndex('MyIndex', 'bcd;bar');
-        $this->assertTrue($res2);
-        $this->assertEmpty($storage_adapter->lastError());
+        $storage_adapter->addToIndex('MyIndex', 'bcd;bar');
         $index_content = scandir(STORAGE_PATH . '/MyIndex/ngrams');
         $expected_content = ['.', '..', ' a', ' b', 'ab', 'bc', 'cd', 'c ', 'd '];
         sort($index_content);
         sort($expected_content);
         $this->assertSame($expected_content, $index_content);
-
         $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ a')[0]);
         $this->assertSame("2\n", file(STORAGE_PATH . '/MyIndex/ngrams/ b')[0]);
         $this->assertSame("1\n", file(STORAGE_PATH . '/MyIndex/ngrams/ab')[0]);

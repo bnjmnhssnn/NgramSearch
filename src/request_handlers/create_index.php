@@ -1,4 +1,7 @@
 <?php
+use NgramSearch\Exception\NgramSearchException;
+use NgramSearch\Exception\IndexNameInUseException;
+
 function create_index(array $vars = [], stdClass $payload) : void {
 
     if(!validate_request($payload)) {
@@ -6,21 +9,19 @@ function create_index(array $vars = [], stdClass $payload) : void {
     }
     $storage = get_storage_adapter();
 
-    if(!$storage->createIndex($payload->index_name)) {
-        switch($storage->lastError()) {
-            case $storage::ERROR_INDEX_NAME_INUSE:
-                $msg = 'Index Name \'' . $payload->index_name . '\' already in use.';
-                set_header("HTTP/1.1 400 Bad Request");  
-                break;
-            case $storage::ERROR_CREATE_INDEX:
-            default:
-                $msg = 'Unknown Error creating Index \'' . $payload->index_name . '\'.';
-                set_header("HTTP/1.1 500 Internal Server Error"); 
-                break;
-        }
+    try {
+        $storage->createIndex($payload->index_name);
+    } catch (IndexNameInUseException $e) {
+        set_header("HTTP/1.1 400 Bad Request"); 
         set_header('Content-type: application/json');
-        echo json_encode(['msg' => $msg]);
-    }
+        echo json_encode(['msg' => $e->getMessage()]);
+        return;
+    } catch (NgramSearchException $e)  {
+        set_header("HTTP/1.1 500 Internal Server Error"); 
+        set_header('Content-type: application/json');
+        echo json_encode(['msg' => $e->getMessage()]);
+        return;
+    } 
     set_header("HTTP/1.1 201 Created"); 
     set_header('Content-type: application/json');
     echo json_encode(
