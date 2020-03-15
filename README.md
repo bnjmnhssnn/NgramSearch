@@ -69,7 +69,14 @@ As you will normally not expose your NgramSearch APIs endpoint directly, you wil
 NOTE: The provided sample file `/imports/15000_sample_products_german.txt` uses a product name as key **AND** value for demonstration purposes
 
 ### Query results and result quality
-Unlike a usual key-value store, NgramSearch will almost always return a large set of possible results when you run a query. The advantage is, you don't have to know the exact key under which a value was stored. For example, if you ask NgramSearch for the movie *Lost in  
+Unlike a usual key-value store, NgramSearch will almost always return a large set of possible results when you run a query. The advantage is, you don't have to know the exact key under which a value was stored. For example, if you want to ask NgramSearch for the movie *Lost in Translation*, but you spell it utterly wrong, e.g. *Lostin trasnlatin*, it may return a result set containing *Lost in Translation, Lost in Space, Hotel Transsylvania* and *How to be a Latin Lover*. *Lost in Translation* will be on top of the list, because it is most similar to the search string.
+
+NgramSearch follows the [single responsibility principle] and therefore returns raw, unrefined results, ordered decending by the number of common ngrams with the search string. Surprisingly often, this raw output is directly usable and could be presented to the end user. But more often, you want to perform further refinements on the result set:
+* re-order items through advanced similarity algorithms (levenshtein distance etc.)
+* remove items below a certain similarity threshold
+* re-order items based on your own business rules, e.g. hide currently sold out products
+* group items
+* optically emphasize parts of the item to indicate the matched string fragment  
 
 
 
