@@ -1,9 +1,11 @@
 <?php
+namespace NgramSearch\RequestHandler\QueryIndex;
+
 use NgramSearch\Preparer;
 use NgramSearch\Ngrams;
 use NgramSearch\NgramIndex;
 
-function query_index(array $vars = []) : void 
+function run(array $vars = []) : void 
 {
     $min_hits = (!empty($_GET['min_hits'])) ? $_GET['min_hits'] : 2; 
     $max_results = (!empty($_GET['max_results'])) ? $_GET['max_results'] : 20;

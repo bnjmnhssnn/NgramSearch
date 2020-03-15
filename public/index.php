@@ -15,12 +15,10 @@ register_shutdown_function(function() use ($logger){
 });
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/','index_list');
-    $r->addRoute('POST', '/create_index', 'create_index');
-    $r->addRoute('POST', '/{index_name}/drop', 'drop_index');
-    $r->addRoute('POST', '/{index_name}/add', 'add_to_index');
-    $r->addRoute('POST', '/{index_name}/remove', 'remove_from_index');
-    $r->addRoute('GET', '/{index_name}/query/{query_string}', 'query_index');
+    $r->addRoute('GET', '/', 'IndexList');
+    $r->addRoute('POST', '/create_index', 'CreateIndex');
+    $r->addRoute('POST', '/{index_name}/add', 'AddToIndex');
+    $r->addRoute('GET', '/{index_name}/query/{query_string}', 'QueryIndex');
     /*
     $r->addRoute('GET', '/{param_name:allowed_value_1|allowed_value_1}', 'foo');
     */
@@ -50,14 +48,14 @@ switch ($routeInfo[0]) {
         http_response_code(405);
         exit;
     case FastRoute\Dispatcher::FOUND:
-        $request_handler = $routeInfo[1];
-        require __DIR__ . '/../src/request_handlers/' . $request_handler . '.php'; 
+        require __DIR__ . '/../src/request_handlers/' . $routeInfo[1] . '.php'; 
+        $handler_function = 'NgramSearch\\RequestHandler\\' . $routeInfo[1] . '\\run';
         $vars = $routeInfo[2];
         if($httpMethod === 'POST') {
             $payload = get_post_payload();
-            $request_handler($vars, $payload);     
+            $handler_function($vars, $payload);     
         } else {
-            $request_handler($vars); 
+            $handler_function($vars); 
         }
         break;
 }

@@ -1,10 +1,12 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use function NgramSearch\RequestHandler\IndexList\run;
  
 class RequestHandlerIndexListTest extends TestCase {
 
     public static function setupBeforeClass() : void
     {
+        require_once __DIR__ .'/../src/request_handlers/IndexList.php';
         cleandir(STORAGE_PATH);
     } 
 
@@ -13,10 +15,10 @@ class RequestHandlerIndexListTest extends TestCase {
         cleandir(STORAGE_PATH);
     }
     
-    public function testIndexListIsEmpty(){
-        require __DIR__ .'/../src/request_handlers/index_list.php';
+    public function testRunNoIndexes() : void
+    {
         ob_start();
-        index_list();
+        run();
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 200 OK', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);

@@ -1,11 +1,12 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use function NgramSearch\RequestHandler\QueryIndex\run;
  
 class RequestHandlerQueryIndexTest extends TestCase {
 
     public static function setupBeforeClass() : void
     {
-        require_once __DIR__ .'/../src/request_handlers/query_index.php';
+        require_once __DIR__ .'/../src/request_handlers/QueryIndex.php';
         cleandir(STORAGE_PATH);
     } 
 
@@ -14,10 +15,10 @@ class RequestHandlerQueryIndexTest extends TestCase {
         cleandir(STORAGE_PATH);
     }
 
-    public function testQueryNotExistingIndex() : void
+    public function testRunOnNotExistingIndex() : void
     {
         ob_start();
-        query_index(['index_name' => 'DoesNotExist', 'query_string' => 'foo']);
+        run(['index_name' => 'DoesNotExist', 'query_string' => 'foo']);
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 400 Bad Request', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);
@@ -25,7 +26,7 @@ class RequestHandlerQueryIndexTest extends TestCase {
     }
 
 
-    public function testQueryIndex() : void
+    public function testRun() : void
     {
         $test_ngram_data = [
             ' a' => [1, 2, 3],
@@ -43,9 +44,8 @@ class RequestHandlerQueryIndexTest extends TestCase {
         ];
         generateTestData('MyIndex', $test_ngram_data, $test_key_value_pairs);
         ob_start();
-        query_index(['index_name' => 'MyIndex', 'query_string' => 'abcd']);
+        run(['index_name' => 'MyIndex', 'query_string' => 'abcd']);
         $output = json_decode(ob_get_clean());
-        print_r($output->data);
         $this->assertContains('HTTP/1.1 200 OK', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);
         $this->assertObjectHasAttribute('data', $output);

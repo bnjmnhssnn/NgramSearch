@@ -1,5 +1,7 @@
 <?php
-function index_list(array $vars = []) : void {
+namespace NgramSearch\RequestHandler\IndexList;
+
+function run(array $vars = []) : void {
 
     $storage = get_storage_adapter();
 
