@@ -1,7 +1,7 @@
 NgramSearch
 ===========
 
-NgramSearch is a key-value store with fuzzy lookup capabilities based on [ngrams]. It can be used as a foundation to build reasonably fast fuzzy search applications for product names, book titles or similar things. NgramSearch built with pure PHP and it's REST Api is inspired by Elasticsearch. There is also a [demo frontend] with 15.000 indexed products (currently in german).
+NgramSearch is a key-value store with fuzzy lookup capabilities based on [ngrams]. It can be used as a foundation to build reasonably fast fuzzy search applications for product names, book titles or similar things. NgramSearch is built with pure PHP and it's REST Api is inspired by Elasticsearch. There is also a [demo frontend] with 15.000 indexed products (currently in german).
 
 ![PHP Composer](https://github.com/bnjmnhssnn/NgramSearch/workflows/PHP%20Composer/badge.svg)
 [![bnjmnhssnn](https://circleci.com/gh/bnjmnhssnn/NgramSearch.svg?style=shield)](https://circleci.com/gh/bnjmnhssnn/NgramSearch)
@@ -45,7 +45,7 @@ Usage
 -----
 Basically, you will use NgramSearch to store key-value pairs. 
 
-### About Keys
+### About keys
 Suited as key are relatively short or medium sized strings. 
 
 * a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
@@ -63,10 +63,13 @@ Better:
 
 Keys will go through a normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
 
-### About Values
+### About values
 As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store the item's id from your main database as value in NgramSearch. However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
 
-NOTE: The provided sample file `/imports/15000_sample_products_german.txt` uses a product name as key and as value for demonstration purposes
+NOTE: The provided sample file `/imports/15000_sample_products_german.txt` uses a product name as key **AND** value for demonstration purposes
+
+### Query results and result quality
+Unlike a usual key-value store, NgramSearch will almost always return a large set of possible results when you run a query. The advantage is, you don't have to know the exact key under which a value was stored. For example, if you ask NgramSearch for the movie *Lost in  
 
 
 
