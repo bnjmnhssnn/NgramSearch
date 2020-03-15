@@ -43,6 +43,34 @@ NgramSearch requires PHP 7.1 or newer.
 
 Usage
 -----
+Basically, you will use NgramSearch to store key-value pairs. 
+
+### About Keys
+Suited as key are relatively short or medium sized strings. 
+
+* a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
+* a book title with author, e.g. *Lewis Carroll Alice's Adventures in Wonderland*
+
+Longer keys are also fine, e.g. a short description of the item. But this will lower the search result quality for short search strings. In order to improve the quality, you could strip filler words from the key.
+
+Not so good:
+
+*Acme Giant Rubber Bands come in all sizes, are fantastically elastic, and are great at tripping road runners (when used properly)*
+
+Better:
+
+*Acme Giant Rubber Bands all sizes elastic tripping road runners*
+
+Keys will go through a normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
+
+### About Values
+As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store the item's id from your main database as value in NgramSearch. However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
+
+NOTE: The provided sample file `/imports/15000_sample_products_german.txt` uses a product name as key and as value for demonstration purposes
+
+
+
+
 ### Create an index
 To create a new index, send a `POST` request with the new indexe's name to the API endpoint `create_index`:
 ```
@@ -65,7 +93,6 @@ Content-Length: 56
 
 key=Acme%20Jet%20Propelled%20Pogo%20Stick&value=12345678
 ```
-In most cases, you will use NgramSearch like here. The key would be a product name, a book title, a street address. As value, you would store the item's id from your main database.
 
 ### Query the index
 In order to make this test sense, you should add some items to your index before you start a query, or you import the provided sample file.
