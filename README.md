@@ -46,7 +46,7 @@ Usage
 ### Create an index
 To create a new index, send a `POST` request with the new indexe's name to the API endpoint `create_index`:
 ```
-POST /create_index HTTP/1.1
+POST https://foo.example/create_index HTTP/1.1
 Host: foo.example
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 18
@@ -58,13 +58,53 @@ This will create a new resource URI `/MyIndex`.
 ### Store your first key-value-pair
 To add a new key-value-pair, send a `POST` request to the newly created resource URI followed by `/add`.
 ```
-POST /MyIndex/add HTTP/1.1
+POST https://foo.example/MyIndex/add HTTP/1.1
 Host: foo.example
 Content-Type: application/x-www-form-urlencoded
-Content-Length: 18
+Content-Length: 56
 
 key=Acme%20Jet%20Propelled%20Pogo%20Stick&value=12345678
 ```
+In most cases, you will use NgramSearch like here. The key would be a product name, a book title, a street address. As value, you would store the item's id from your main database.
+
+### Query the index
+In order to make this test sense, you should add some items to your index before you start a query, or you import the provided sample file.
+
+To query an index, send a `GET` request to the index's URI followed by `/query/` and your search string:
+```
+GET https://foo.example/MyIndex/query/{search_string} HTTP/1.1
+Host: foo.example
+```
+(Replace {search_string} with any urlencoded test string)
+
+In case you have some indexed items, and their keys share any common ngrams with your query string, the API will respond with a json encoded item list, descending ordered by the count of common ngrams:
+```javascript
+{
+    "data": [
+        {
+            "id": 123,
+            "key": "Acme Jet Propelled Pogo Stick",
+            "value": "12345678",
+            "ngrams_hit": 5,
+            "ngram_details": [/*...*/]
+        },
+        {
+            "id": 345,
+            "key": "Acme Jet Propelled Unicycle",
+            "value": "12345679",
+            "ngrams_hit": 4,
+            "ngram_details": [/*...*/]
+        },
+        /*...*/
+    ],
+    "meta": {/*...*/},
+    "links": {/*...*/}
+}
+```
+
+
+
+
 
 
 
