@@ -1,7 +1,7 @@
 NgramSearch
 ===========
 
-NgramSearch is a reasonably fast fuzzy search implementation based on [ngrams]. It is built with pure PHP and it's REST Api is inspired by Elasticsearch. There is also a [demo frontend] with 15.000 indexed products (currently in german).
+NgramSearch is a key-value store with fuzzy lookup capabilities based on [ngrams]. It can be used as a foundation to build reasonably fast fuzzy search applications for product names, book titles or similar things. NgramSearch built with pure PHP and it's REST Api is inspired by Elasticsearch. There is also a [demo frontend] with 15.000 indexed products (currently in german).
 
 ![PHP Composer](https://github.com/bnjmnhssnn/NgramSearch/workflows/PHP%20Composer/badge.svg)
 [![bnjmnhssnn](https://circleci.com/gh/bnjmnhssnn/NgramSearch.svg?style=shield)](https://circleci.com/gh/bnjmnhssnn/NgramSearch)
@@ -43,8 +43,32 @@ NgramSearch requires PHP 7.1 or newer.
 
 Usage
 -----
+### Create an index
+To create a new index, send a `POST` request with the new indexe's name to the API endpoint `create_index`:
+```
+POST /create_index HTTP/1.1
+Host: foo.example
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 18
 
-Lorem ipsum dolor sit amet
+index_name=MyIndex
+```
+This will create a new resource URI `/MyIndex`.
+
+### Store your first key-value-pair
+To add a new key-value-pair, send a `POST` request to the newly created resource URI followed by `/add`.
+```
+POST /MyIndex/add HTTP/1.1
+Host: foo.example
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 18
+
+key=Acme%20Jet%20Propelled%20Pogo%20Stick&value=12345678
+```
+
+
+
+Basically, NgramIndex is a key-value-store. You can 
 
 ### Test
 
