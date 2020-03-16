@@ -149,7 +149,7 @@ In case you have some indexed items, and their keys share any common ngrams with
 }
 ```
 
-
+[json:api]: https://jsonapi.org
 [demo frontend]: http://ngram-search-demo.benjamin-hosseinian.de 
 [demo frontend repo]: https://github.com/bnjmnhssnn/NgramSearchDemo
 [ngrams]: https://en.wikipedia.org/wiki/N-gram
