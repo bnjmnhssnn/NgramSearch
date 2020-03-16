@@ -64,7 +64,7 @@ Longer keys are also fine, e.g. a short description of the item. The drawback is
 Keys will also go through an automatic normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
 
 ### Values in NgramSearch
-There is not much to say about **values** in NgramSearch: you can store any string as value. As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store the item's id from your main database as value in NgramSearch. 
+There is not much to say about **values** in NgramSearch: you can store any string as value. As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store an item id from your main database as value in NgramSearch. 
 
 However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
 
