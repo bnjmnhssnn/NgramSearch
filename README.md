@@ -43,17 +43,21 @@ NgramSearch requires PHP 7.1 or newer.
 
 How it works
 ------------
-Basically, NgramSearch is a **key-value store**, but retrieving stored values is special... 
+Basically, NgramSearch is a **key-value store**. While there is nothing special about the **values** you can store, **keys** are quite special:
 
 ### Keys in NgramSearch
-Suited as **key** are relatively short or medium sized strings. Here are 2 examples what could be a good key:
+In Redis, for example, you would choose a short descriptive string as key, and maybe extend it with an id, like *user:1234*.
+You would then use this exact string to retrieve the stored value.
+
+**NgramSearch is made for fuzzy string matching, and the strings to match are the keys in this key-value store.** 
+Good NgramSearch keys are short or medium sized strings, like these 2 examples:
 
 * a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
 * a book title with author, e.g. *Lewis Carroll Alice's Adventures in Wonderland*
 
 Longer keys are also fine, e.g. a short description of the item. The drawback is, long keys tend to lower the search result quality for short search strings. In order to improve the quality, strip filler words from the key, before storing it in NgramSearch.
 
-**Not so good item description as key:**
+**Not so good description:**
 
 *Acme Giant Rubber Bands come in all sizes, are fantastically elastic, and are great at tripping road runners (when used properly)*
 
@@ -61,17 +65,17 @@ Longer keys are also fine, e.g. a short description of the item. The drawback is
 
 *Acme Giant Rubber Bands all sizes elastic tripping road runners*
 
-Keys will also go through an automatic normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
+All keys will also go through an automatic normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
 
 ### Values in NgramSearch
-There is not much to say about **values** in NgramSearch: you can store any string as value. As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store an item id from your main database as value in NgramSearch. 
+There is not much to say about **values** in NgramSearch: you can store any string as value. A typical example for a value is an item id. As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store a primary key from your main database as value in NgramSearch. 
 
 However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
 
 NOTE: The provided sample file `/imports/15000_sample_products_german.txt` uses a product name as key **AND** value for demonstration purposes
 
 ### Query results
-Unlike a usual key-value store, NgramSearch will almost always return a large set of possible results when you run a query. The advantage is, you don't have to know the exact key under which a value was stored. For example, if you want to ask NgramSearch for the movie *Lost in Translation*, but you spell it utterly wrong, e.g. *Lostin trasnlatin*, it may return a result set containing *Lost in Translation, Lost in Space, Hotel Transsylvania* and *How to be a Latin Lover*. *Lost in Translation* will be on top of the list, because it is most similar to the search string.
+Unlike a usual key-value store, NgramSearch will almost always return a large set of possible results when you run a query. For example, if you want to ask NgramSearch for the movie *Lost in Translation*, but you spell it utterly wrong, e.g. *Lostin trasnlatin*, it may return a result set containing *Lost in Translation, Lost in Space, Hotel Transsylvania* and *How to be a Latin Lover*. *Lost in Translation* will be on top of the list, because it is most similar to the search string.
 
 ### Result refinement
 NgramSearch follows the [single-responsibility principle] and therefore returns raw, unrefined results, ordered decending by the number of common ngrams with the search string. Surprisingly often, this raw output is directly usable and could be presented to the end user. But more often, you want to perform further refinements on the result set:
