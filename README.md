@@ -37,7 +37,7 @@ Run the *import* console command.
 ```sh
 php cli.php import
 ```
-You will be promted to select a *.txt* from the *import* directory. Select one of the sample files. Importing large data sets takes it's time, so start with a small one.
+You will be promted to select a *.txt* from the *import* directory. Select one of the sample files and start indexing!
 
 NgramSearch requires PHP 7.1 or newer.
 
