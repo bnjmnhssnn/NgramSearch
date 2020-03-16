@@ -43,10 +43,10 @@ NgramSearch requires PHP 7.1 or newer.
 
 How it works
 ------------
-Basically, NgramSearch is a key-value store. 
+Basically, NgramSearch is a **key-value store**, but retrieving stored values is special... 
 
-### About keys
-Suited as key are relatively short or medium sized strings. Here are 2 examples what could be a good key:
+### Keys in NgramSearch
+Suited as **key** are relatively short or medium sized strings. Here are 2 examples what could be a good key:
 
 * a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
 * a book title with author, e.g. *Lewis Carroll Alice's Adventures in Wonderland*
@@ -63,25 +63,28 @@ Better, with stripped filler words:
 
 Keys will also go through an automatic normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
 
-### About values
-As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store the item's id from your main database as value in NgramSearch. However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
+### Values in NgramSearch
+There is not much to say about **values** in NgramSearch: you can store any string as value. As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store the item's id from your main database as value in NgramSearch. 
+
+However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
 
 NOTE: The provided sample file `/imports/15000_sample_products_german.txt` uses a product name as key **AND** value for demonstration purposes
 
 ### Query results
 Unlike a usual key-value store, NgramSearch will almost always return a large set of possible results when you run a query. The advantage is, you don't have to know the exact key under which a value was stored. For example, if you want to ask NgramSearch for the movie *Lost in Translation*, but you spell it utterly wrong, e.g. *Lostin trasnlatin*, it may return a result set containing *Lost in Translation, Lost in Space, Hotel Transsylvania* and *How to be a Latin Lover*. *Lost in Translation* will be on top of the list, because it is most similar to the search string.
 
-### Overfetching and result refinement
-NgramSearch follows the [single responsibility principle] and therefore returns raw, unrefined results, ordered decending by the number of common ngrams with the search string. Surprisingly often, this raw output is directly usable and could be presented to the end user. But more often, you want to perform further refinements on the result set:
+### Result refinement
+NgramSearch follows the [single-responsibility principle] and therefore returns raw, unrefined results, ordered decending by the number of common ngrams with the search string. Surprisingly often, this raw output is directly usable and could be presented to the end user. But more often, you want to perform further refinements on the result set:
+
 * re-order items through advanced similarity algorithms (levenshtein distance etc.)
 * remove items below a certain similarity threshold
 * re-order or remove items based on your own business rules, e.g. hide currently sold out products
 * group items
 * optically emphasize parts of the item to indicate the matched string fragment
-...
 
+Those possible actions are out of NgramSearch's scope and must be implemented client-side. NgramSearch provides some statistical data with each result item, that could be used to calculate the similarity with the search string.
 
-Usage
+API quick reference
 -----
 
 ### Create an index
@@ -145,4 +148,5 @@ In case you have some indexed items, and their keys share any common ngrams with
 
 [demo frontend]: http://ngram-search-demo.benjamin-hosseinian.de 
 [demo frontend repo]: https://github.com/bnjmnhssnn/NgramSearchDemo
-[ngrams]: https://en.wikipedia.org/wiki/N-gram "n-grams"
+[ngrams]: https://en.wikipedia.org/wiki/N-gram
+[single-responsibility principle]: https://en.wikipedia.org/wiki/Single-responsibility_principle
