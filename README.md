@@ -46,22 +46,22 @@ How it works
 Basically, NgramSearch is a key-value store. 
 
 ### About keys
-Suited as key are relatively short or medium sized strings. 
+Suited as key are relatively short or medium sized strings. Here are 2 examples what could be a good key:
 
 * a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
 * a book title with author, e.g. *Lewis Carroll Alice's Adventures in Wonderland*
 
-Longer keys are also fine, e.g. a short description of the item. But this will lower the search result quality for short search strings. In order to improve the quality, you could strip filler words from the key.
+Longer keys are also fine, e.g. a short description of the item. But this will lower the search result quality for short search strings. In order to improve the quality, you could strip filler words from the key, before storing it in NgramSearch.
 
-Not so good:
+Not so good item description as key:
 
 *Acme Giant Rubber Bands come in all sizes, are fantastically elastic, and are great at tripping road runners (when used properly)*
 
-Better:
+Better, with stripped filler words:
 
 *Acme Giant Rubber Bands all sizes elastic tripping road runners*
 
-Keys will go through a normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
+Keys will also go through an automatic normalization step before they are stored. At this point, this means replacing any non german accented chars by their non-accented variant, conversion to lowercase and stripping of special chars. It is planned to provide some localized normalization strategies, later.
 
 ### About values
 As you will normally not expose your NgramSearch APIs endpoint directly, you will usually store the item's id from your main database as value in NgramSearch. However, if you protect the critical endpoints, you could expose the API to the public and store complex data structures as values, e.g. your product data as json, or a search result item's HTML representation. You will then gain a performance boost as you save one network request.
