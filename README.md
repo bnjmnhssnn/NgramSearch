@@ -82,7 +82,7 @@ NgramSearch follows the [single-responsibility principle] and therefore returns 
 * group items
 * optically emphasize parts of the item to indicate the matched string fragment
 
-Those possible actions are out of NgramSearch's scope and must be implemented client-side. NgramSearch provides some statistical data with each result item, that could be used to calculate the similarity with the search string.
+All of these are out of NgramSearch's scope and must be implemented client-side. NgramSearch provides some statistical data for each result item, that could be used to calculate the individual item relevance.
 
 API quick reference
 -----
