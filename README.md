@@ -51,13 +51,13 @@ Suited as **key** are relatively short or medium sized strings. Here are 2 examp
 * a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
 * a book title with author, e.g. *Lewis Carroll Alice's Adventures in Wonderland*
 
-Longer keys are also fine, e.g. a short description of the item. The drawback is, long keys tend to lower the search result quality for short search strings. In order to improve the quality, you could strip filler words from the key, before storing it in NgramSearch.
+Longer keys are also fine, e.g. a short description of the item. The drawback is, long keys tend to lower the search result quality for short search strings. In order to improve the quality, strip filler words from the key, before storing it in NgramSearch.
 
-Not so good item description as key:
+**Not so good item description as key:**
 
 *Acme Giant Rubber Bands come in all sizes, are fantastically elastic, and are great at tripping road runners (when used properly)*
 
-Better, with stripped filler words:
+**Better, with stripped filler words:**
 
 *Acme Giant Rubber Bands all sizes elastic tripping road runners*
 
