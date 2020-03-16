@@ -51,7 +51,7 @@ Suited as key are relatively short or medium sized strings. Here are 2 examples 
 * a product name with brand, e.g. *Acme Jet Propelled Pogo Stick*
 * a book title with author, e.g. *Lewis Carroll Alice's Adventures in Wonderland*
 
-Longer keys are also fine, e.g. a short description of the item. But this will lower the search result quality for short search strings. In order to improve the quality, you could strip filler words from the key, before storing it in NgramSearch.
+Longer keys are also fine, e.g. a short description of the item. The drawback is, long keys tend to lower the search result quality for short search strings. In order to improve the quality, you could strip filler words from the key, before storing it in NgramSearch.
 
 Not so good item description as key:
 
