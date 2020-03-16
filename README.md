@@ -127,25 +127,25 @@ Host: foo.example
 In case you have some indexed items, and their keys share any common ngrams with your query string, the API will respond with a json encoded item list, descending ordered by the count of common ngrams:
 ```javascript
 {
-    "data": [
+    data: [
         {
-            "id": 123,
-            "key": "Acme Jet Propelled Pogo Stick",
-            "value": "12345678",
-            "ngrams_hit": 5,
-            "ngram_details": [/*...*/]
+            id: 123,
+            key: "Acme Jet Propelled Pogo Stick",
+            value: "12345678",
+            ngrams_hit: 5,
+            ngram_details: [/*...*/]
         },
         {
-            "id": 345,
-            "key": "Acme Jet Propelled Unicycle",
-            "value": "12345679",
-            "ngrams_hit": 4,
-            "ngram_details": [/*...*/]
+            id: 345,
+            key: "Acme Jet Propelled Unicycle",
+            value: "12345679",
+            ngrams_hit: 4,
+            ngram_details: [/*...*/]
         },
         /*...*/
     ],
-    "meta": {/*...*/},
-    "links": {/*...*/}
+    meta: {/*...*/},
+    links: {/*...*/}
 }
 ```
 
