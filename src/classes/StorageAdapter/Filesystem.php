@@ -5,6 +5,7 @@ use NgramSearch\Ngrams;
 use NgramSearch\Preparer;
 use NgramSearch\Exception\DropIndexException;
 use NgramSearch\Exception\AddToIndexException;
+use NgramSearch\Exception\FlushIndexException;
 use NgramSearch\Exception\CreateIndexException;
 use NgramSearch\Exception\IndexNotFoundException;
 use NgramSearch\Exception\IndexNameInUseException;
@@ -63,6 +64,19 @@ class Filesystem implements StorageAdapterInterface
         }
         if(!$this->rrmdir($this->storage_path . '/' . $name)) {
             throw new DropIndexException('Index \'' . $name . '\' could not be removed.');     
+        }
+    }
+
+    public function flushIndex(string $name) : void
+    {
+        if (!file_exists($this->storage_path . '/' . $name)) {
+            throw new IndexNotFoundException('Index \'' . $name . '\' not found.'); 
+        }
+        if(!$this->cleandir($this->storage_path . '/' . $name . '/ngrams')) {
+            throw new FlushIndexException('Try to flush index \'' . $name . '\', but ngrams dir could not be cleaned.');     
+        }
+        if(false === file_put_contents($this->storage_path . '/' . $name . '/key_value_pairs.txt', '')) {
+            throw new FlushIndexException('Try to flush index \'' . $name . '\', but \'key_value_pairs.txt\' could not be cleaned.');          
         }
     }
 
@@ -143,6 +157,27 @@ class Filesystem implements StorageAdapterInterface
             scandir($dir)
         );
         return rmdir($dir); 
+    }
+
+    protected function cleandir(string $dir, bool $keep = true) : bool { 
+        if (!is_dir($dir)) {
+            return false;
+        }
+        array_map(
+            function($item) use ($dir) {
+                if (in_array($item, ['.', '..'])) {
+                    return;
+                }
+                if(!$this->cleandir($dir . '/' . $item, false)) {
+                    unlink($dir . '/' . $item);
+                }
+            },
+            scandir($dir)
+        );
+        if ($keep) {
+            return true;
+        }
+        return rmdir($dir);
     }
 
     /*

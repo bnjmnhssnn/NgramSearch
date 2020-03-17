@@ -134,5 +134,34 @@ class StorageAdapterFilesystemTest extends TestCase {
             ['ab', 'foo'],
             $storage_adapter->getKeyValuePair('MyIndex', 1)
         );
-    } 
+    }
+    
+    /**
+     * @depends testAddToIndex
+     */
+    public function testFlushIndex() : void
+    {
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->createIndex('FlushMe');
+        $storage_adapter->addToIndex('FlushMe', 'ab;foo');
+        $storage_adapter->flushIndex('FlushMe');
+        $this->assertSame(
+            [],
+            file(STORAGE_PATH . '/FlushMe/key_value_pairs.txt')
+        ); 
+        $this->assertSame(
+            ['.', '..'],
+            scandir(STORAGE_PATH . '/FlushMe/ngrams')
+        ); 
+    }
+
+    /**
+     * @depends testFlushIndex
+     */
+    public function testFlushInexistingIndexThrowsException() : void
+    {
+        $this->expectException(IndexNotFoundException::class);
+        $storage_adapter = get_storage_adapter();
+        $storage_adapter->flushIndex('DoesNotExist');  
+    }
 }
