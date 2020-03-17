@@ -31,13 +31,8 @@ class Filesystem implements StorageAdapterInterface
                 if(is_dir($this->storage_path . '/' . $item) && !in_array($item, ['.', '..'])) {
                     $ngrams = scandir($this->storage_path . '/' . $item);   
                     return [
-                        'index_name' => $item,
-                        'ngrams' => array_values(array_filter(
-                            $ngrams,
-                            function($item) {
-                                return !in_array($item, ['.', '..']);
-                            }
-                        ))  
+                        'name' => $item,
+                        'size' => $this->getIndexSize($item) 
                     ];
                 }
             },
@@ -123,6 +118,13 @@ class Filesystem implements StorageAdapterInterface
             },
             preg_split('/;|\|/', $values_file->current())
         );
+    }
+
+    public function getIndexSize(string $index_name) : int
+    {
+        $values_file = new \SplFileObject($this->storage_path . '/' . $index_name . '/key_value_pairs.txt', 'r');
+        $values_file->seek(PHP_INT_MAX);
+        return $values_file->key();
     }
 
     protected function rrmdir($dir) { 

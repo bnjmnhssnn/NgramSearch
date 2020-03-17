@@ -15,10 +15,16 @@ register_shutdown_function(function() use ($logger){
 });
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-    $r->addRoute('GET', '/', 'IndexList');
-    $r->addRoute('POST', '/create_index', 'CreateIndex');
-    $r->addRoute('POST', '/{index_name}/add', 'AddToIndex');
-    $r->addRoute('GET', '/{index_name}/query/{query_string}', 'QueryIndex');
+    $r->addRoute('GET', '[/]', 'ApiInfo');
+    $r->addRoute('POST', '/create_index[/]', 'CreateIndex');
+    $r->addRoute('GET', '/indexes[/]', 'IndexList');
+    $r->addRoute('GET', '/indexes/{index_name}[/]', 'IndexInfo');
+    $r->addRoute('POST', '/indexes/{index_name}/add[/]', 'AddToIndex');
+    $r->addRoute('GET', '/indexes/{index_name}/query[/]', 'QueryIndex');
+    $r->addRoute('POST', '/indexes/{index_name}/drop[/]', 'DropIndex');
+    $r->addRoute('POST', '/indexes/{index_name}/flush[/]', 'FlushIndex');
+    $r->addRoute('POST', '/indexes/{index_name}/rebuild[/]', 'RebuildIndex');
+    $r->addRoute('POST', '/indexes/{index_name}/mass_import[/]', 'MassImport');
     /*
     $r->addRoute('GET', '/{param_name:allowed_value_1|allowed_value_1}', 'foo');
     */

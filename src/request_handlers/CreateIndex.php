@@ -55,9 +55,19 @@ function run(array $vars = [], \stdClass $payload) : void {
     } 
     set_header("HTTP/1.1 201 Created"); 
     set_header('Content-type: application/vnd.api+json');
+    set_header('Location: ' . API_BASE_URL . '/' . $payload->index_name);
     echo json_encode(
         [
-            'msg' => 'Index \'' . $payload->index_name . '\' successfully_created.'
+            'data' => [
+                'type' => 'index',
+                'name' => $payload->index_name
+            ],
+            'links' => [
+                'self' => API_BASE_URL . '/' . $payload->index_name
+            ],
+            'meta' => [
+                'msg' => 'Index \'' . $payload->index_name . '\' successfully_created.'   
+            ]
         ]
     ); 
     return; 

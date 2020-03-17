@@ -7,10 +7,8 @@ function run(array $vars = []) : void {
 
     $indexes = array_map(
         function($item) {
-            $item['ngram_count'] = count($item['ngrams']);
-            unset($item['ngrams']);
             $item['links'] = [
-                'self' => '/' . $item['index_name']
+                'self' => API_BASE_URL . '/' . $item['name']
             ];
             return $item;
         },   
@@ -22,7 +20,7 @@ function run(array $vars = []) : void {
         [
             'data' => $indexes, 
             'links' => [
-                'self' => '/',
+                'self' => API_BASE_URL,
             ]
         ]
     );

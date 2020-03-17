@@ -54,7 +54,5 @@ class RequestHandlerCreateIndexTest extends TestCase {
         $output = json_decode(ob_get_clean());
         $this->assertContains('HTTP/1.1 201 Created', $GLOBALS['phpunit_header_jar']);
         $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);
-        $this->assertObjectHasAttribute('msg', $output);
-        $this->assertIsString($output->msg);    
     }
 }
