@@ -1,8 +1,11 @@
 <?php
 namespace NgramSearch\CliCommand;
 
-use NgramSearch\Preparer;
 use NgramSearch\Ngrams;
+use NgramSearch\Preparer;
+use NgramSearch\Exception\AddToIndexException;
+use NgramSearch\Exception\NgramSearchException;
+use NgramSearch\Exception\IndexNameInUseException;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,34 +60,25 @@ class Import extends Command
 
         $storage = get_storage_adapter();
 
-        if(!$storage->createIndex($index_name)) {
-            switch($storage->lastError()) {
-                case $storage::ERROR_INDEX_NAME_INUSE:
-                    $io->error('Index already exists, exit console.');
-                    exit; 
-                    break;
-                case $storage::ERROR_CREATE_INDEX:
-                default:
-                    $io->error('Unknown error creating index, exit console.');
-                    exit;
-                    break;
-            }
-        }
-
+        try {
+            $storage->createIndex($index_name);
+        } catch (IndexNameInUseException $e) {
+            $io->error('Index already exists, exit console.');
+            exit; 
+        } catch (NgramSearchException $e)  {
+            $io->error('Unknown error creating index, exit console.');
+            exit;
+        } 
         $import_fh = fopen(realpath(__DIR__ . '/../../../import/' . $import_files[$choice]), 'r');
         $successful = 0;
         $with_error = 0;
         while (!feof($import_fh)) {
-
             $line = fgets($import_fh);
-            list($key, $value) = explode(';', $line);
-            if(empty($key) || empty($value)) {
+            try {
+                $storage->addToIndex($index_name, rtrim($line, "\n"));
+            } catch (\Exception $e) {
                 $with_error++;
-                continue;    
-            }
-            if(!$storage->addToIndex($index_name, rtrim($line, "\n"))) {
-                $with_error++;
-                continue;   
+                continue;     
             }
             $output->writeln($line);
             $successful++;
@@ -93,7 +87,6 @@ class Import extends Command
         if($with_error) {
             $io->error($with_error . ' errors.');    
         }
-   
     }
 }
 
