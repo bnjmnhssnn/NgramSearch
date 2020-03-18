@@ -84,7 +84,7 @@ class Filesystem implements StorageAdapterInterface
     {
         $parts = explode(';', $key_value_pair);
         if(count($parts) !== 2) {
-            throw new \InvalidArgumentException('Argument 2 \'$key_value_pair\' could not be splitted.');  
+            throw new \InvalidArgumentException('Argument 2 \'$key_value_pair\' could not be splitted, given was \'' . $key_value_pair . '\'.');  
         }
         $ngrams = Ngrams::extract(Preparer::get($parts[0], false));
         $index_path = $this->storage_path . '/' . $index_name;
