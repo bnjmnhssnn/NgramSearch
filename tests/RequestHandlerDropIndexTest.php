@@ -15,12 +15,24 @@ class RequestHandlerDropIndexTest extends TestCase {
         cleandir(STORAGE_PATH);
     }
 
-    public function testDummy() : void
+    public function testRunIndexDoesNotExist() : void
     {
         $payload = json_decode('{}');
         ob_start();
-        run([], $payload);
+        run(['index_name' => 'WrongIndexName'], $payload);
         $output = json_decode(ob_get_clean());
-        $this->assertContains('HTTP/1.1 500 Internal Server Error', $GLOBALS['phpunit_header_jar']);
+        $this->assertContains('HTTP/1.1 400 Bad Request', $GLOBALS['phpunit_header_jar']);
+        $this->assertContains('Content-type: application/vnd.api+json', $GLOBALS['phpunit_header_jar']);
+        $this->assertObjectHasAttribute('errors', $output);
+    }
+
+    public function testRun() : void
+    {
+        generateTestData('MyIndex', [], []);
+        $payload = json_decode('{}');
+        ob_start();
+        run(['index_name' => 'MyIndex'], $payload);
+        $output = json_decode(ob_get_clean());
+        $this->assertContains('HTTP/1.1 204 No Content', $GLOBALS['phpunit_header_jar']);
     }
 }
