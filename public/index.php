@@ -20,7 +20,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/indexes[/]', 'IndexList');
     $r->addRoute('GET', '/indexes/{index_name}[/]', 'IndexInfo');
     $r->addRoute('POST', '/indexes/{index_name}/add[/]', 'AddToIndex');
-    $r->addRoute('GET', '/indexes/{index_name}/query[/]', 'QueryIndex');
+    $r->addRoute('GET', '/indexes/{index_name}/query/{query_string}[/]', 'QueryIndex');
     $r->addRoute('POST', '/indexes/{index_name}/drop[/]', 'DropIndex');
     $r->addRoute('POST', '/indexes/{index_name}/flush[/]', 'FlushIndex');
     $r->addRoute('POST', '/indexes/{index_name}/rebuild[/]', 'RebuildIndex');
