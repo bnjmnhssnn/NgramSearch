@@ -33,7 +33,6 @@ class RequestHandlerFlushIndexTest extends TestCase {
         ob_start();
         run(['index_name' => 'MyIndex'], $payload);
         $output = json_decode(ob_get_clean());
-        print_r($output);
         $this->assertContains('HTTP/1.1 200 OK', $GLOBALS['phpunit_header_jar']);
     }
 }
