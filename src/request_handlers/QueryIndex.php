@@ -63,10 +63,11 @@ function prepare_result(array $query_res, string $query_string) : array
                 function ($item) use ($search_ngrams, $key_ngrams) {
                     return [
                         'value' => $item,
-                        'pos' => join(',', array_keys($key_ngrams, $item))
+                        'pos_in_key' => join(',', array_keys($key_ngrams, $item)),
+                        'pos_in_search' => join(',', array_keys($search_ngrams, $item))
                     ];
                 },    
-                array_values(array_intersect($search_ngrams, $key_ngrams))
+                array_values(array_unique(array_intersect($key_ngrams, $search_ngrams)))
             );
             return $item;
         },

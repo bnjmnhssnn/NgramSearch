@@ -26,7 +26,7 @@ class RequestHandlerQueryIndexTest extends TestCase {
     }
 
 
-    public function testRun() : void
+    public function testRunBasics() : void
     {
         $test_ngram_data = [
             ' a' => [1, 2, 3],
@@ -59,11 +59,11 @@ class RequestHandlerQueryIndexTest extends TestCase {
                     'value' => 'foo',
                     'ngrams_hit' => 5,
                     'ngram_details' => [
-                        ['value' => ' a', 'pos' => '0'],
-                        ['value' => 'ab', 'pos' => '1'],
-                        ['value' => 'bc', 'pos' => '2'],
-                        ['value' => 'cd', 'pos' => '3'],
-                        ['value' => 'd ', 'pos' => '4']
+                        ['value' => ' a', 'pos_in_key' => '0', 'pos_in_search' => '0'],
+                        ['value' => 'ab', 'pos_in_key' => '1', 'pos_in_search' => '1'],
+                        ['value' => 'bc', 'pos_in_key' => '2', 'pos_in_search' => '2'],
+                        ['value' => 'cd', 'pos_in_key' => '3', 'pos_in_search' => '3'],
+                        ['value' => 'd ', 'pos_in_key' => '4', 'pos_in_search' => '4']
                     ]
                 ],
                 [
@@ -72,9 +72,9 @@ class RequestHandlerQueryIndexTest extends TestCase {
                     'value' => 'bar',
                     'ngrams_hit' => 3,
                     'ngram_details' => [
-                        ['value' => ' a', 'pos' => '0'],
-                        ['value' => 'ab', 'pos' => '1'],
-                        ['value' => 'bc', 'pos' => '2']
+                        ['value' => ' a', 'pos_in_key' => '0', 'pos_in_search' => '0'],
+                        ['value' => 'ab', 'pos_in_key' => '1', 'pos_in_search' => '1'],
+                        ['value' => 'bc', 'pos_in_key' => '2', 'pos_in_search' => '2']
                     ]
                 ],
                 [
@@ -83,12 +83,92 @@ class RequestHandlerQueryIndexTest extends TestCase {
                     'value' => 'baz',
                     'ngrams_hit' => 2,
                     'ngram_details' => [
-                        ['value' => ' a', 'pos' => '0'],
-                        ['value' => 'ab', 'pos' => '1']
+                        ['value' => ' a', 'pos_in_key' => '0', 'pos_in_search' => '0'],
+                        ['value' => 'ab', 'pos_in_key' => '1', 'pos_in_search' => '1']
                     ]
                 ],
             ],
             json_decode(json_encode($output->data), true)
         ); 
+    }
+
+    public function testRunMultipleNgramPositions() : void
+    {
+        $test_ngram_data = [
+            ' b' => [1],
+            'ba' => [1],
+            'an' => [1],
+            'na' => [1],
+            'a ' => [1]
+        ];
+        $test_key_value_pairs = [
+            'banana;foo',
+        ];
+        generateTestData('MyIndex', $test_ngram_data, $test_key_value_pairs);
+        ob_start();
+        run(['index_name' => 'MyIndex', 'query_string' => 'banana']);
+        $output = json_decode(ob_get_clean());
+        $this->assertSame(
+            [
+                [
+                    'id' => 1,
+                    'key' => 'banana',
+                    'value' => 'foo',
+                    'ngrams_hit' => 5,
+                    'ngram_details' => [
+                        ['value' => ' b', 'pos_in_key' => '0', 'pos_in_search' => '0'],
+                        ['value' => 'ba', 'pos_in_key' => '1', 'pos_in_search' => '1'],
+                        ['value' => 'an', 'pos_in_key' => '2,4', 'pos_in_search' => '2,4'],
+                        ['value' => 'na', 'pos_in_key' => '3,5', 'pos_in_search' => '3,5'],
+                        ['value' => 'a ', 'pos_in_key' => '6', 'pos_in_search' => '6']
+                    ]
+                ]
+            ],
+            json_decode(json_encode($output->data), true)
+        );
+    }
+
+    public function testRunMixedNgramPositions() : void
+    {
+        $test_ngram_data = [
+            ' f' => [1],
+            'fo' => [1],
+            'oo' => [1],
+            'o ' => [1],
+            ' b' => [1],
+            'ba' => [1],
+            'ar' => [1],
+            'r ' => [1],
+
+        ];
+        $test_key_value_pairs = [
+            'foo bar;baz',
+        ];
+        generateTestData('MyIndex', $test_ngram_data, $test_key_value_pairs);
+        ob_start();
+        run(['index_name' => 'MyIndex', 'query_string' => 'bar foo']);
+        $output = json_decode(ob_get_clean());
+        $this->assertSame(
+            [
+                [
+                    'id' => 1,
+                    'key' => 'foo bar',
+                    'value' => 'baz',
+                    'ngrams_hit' => 8,
+                    'ngram_details' => [
+                        ['value' => ' f', 'pos_in_key' => '0', 'pos_in_search' => '4'],
+                        ['value' => 'fo', 'pos_in_key' => '1', 'pos_in_search' => '5'],
+                        ['value' => 'oo', 'pos_in_key' => '2', 'pos_in_search' => '6'],
+                        ['value' => 'o ', 'pos_in_key' => '3', 'pos_in_search' => '7'],
+                        ['value' => ' b', 'pos_in_key' => '4', 'pos_in_search' => '0'],
+                        ['value' => 'ba', 'pos_in_key' => '5', 'pos_in_search' => '1'],
+                        ['value' => 'ar', 'pos_in_key' => '6', 'pos_in_search' => '2'],
+                        ['value' => 'r ', 'pos_in_key' => '7', 'pos_in_search' => '3']
+                    ]
+                ]
+            ],
+            json_decode(json_encode($output->data), true)
+        );
+
     }
 }
