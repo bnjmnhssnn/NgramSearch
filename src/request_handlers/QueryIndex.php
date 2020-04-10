@@ -41,14 +41,12 @@ function run(array $vars = []) : void
         'meta' => [
             'result_length' => min(50, count($query_res)),
             'duration' => $duration,
+            'peak_memory' => (memory_get_peak_usage(false)/1000/1000) . 'MB'
         ],
         'links' => [
             'self' => '/' . $vars['index_name'] . '/query/' . $vars['query_string'],
         ]
     ];
-    if(defined('SERVER_INFO')) {
-        $response_array['meta']['server_info'] = SERVER_INFO;   
-    }
     echo json_encode($response_array);
     return;   
 }
