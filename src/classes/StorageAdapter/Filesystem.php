@@ -25,6 +25,13 @@ class Filesystem implements StorageAdapterInterface
         return (is_dir($this->storage_path . '/' . $name));
     } 
 
+    public function getIndexSize(string $name) : int
+    {
+        $values_file = new \SplFileObject($this->storage_path . '/' . $name . '/key_value_pairs.txt', 'r');
+        $values_file->seek(PHP_INT_MAX);
+        return $values_file->key();
+    }
+
     public function listIndexes() : array
     {
         return array_values(array_filter(array_map(
@@ -80,14 +87,13 @@ class Filesystem implements StorageAdapterInterface
         }
     }
 
-    public function addToIndex(string $index_name, string $key_value_pair) : void
+    public function addToIndex(string $name, string $key_value_pair) : void
     {
         $parts = explode(';', $key_value_pair);
         if(count($parts) !== 2) {
             throw new \InvalidArgumentException('Argument 2 \'$key_value_pair\' could not be splitted, given was \'' . $key_value_pair . '\'.');  
         }
-        $ngrams = Ngrams::extract(Preparer::get($parts[0], false));
-        $index_path = $this->storage_path . '/' . $index_name;
+        $index_path = $this->storage_path . '/' . $name;
         if (!file_exists($index_path) || !is_dir($index_path)) {
             throw new IndexNotFoundException('Index \'' . $name . '\' not found.'); 
         }
@@ -97,6 +103,7 @@ class Filesystem implements StorageAdapterInterface
         $values_file = new \SplFileObject($index_path . '/key_value_pairs.txt', 'r');
         $values_file->seek(PHP_INT_MAX);
         $new_value_id = $values_file->key();
+        $ngrams = Ngrams::extract(Preparer::get($parts[0], false));
         foreach ($ngrams as $ngram) {
             if(!file_put_contents($index_path . '/ngrams/' . $ngram, $new_value_id . "\n", FILE_APPEND | LOCK_EX)) {
                 throw new AddToIndexException('Could not write to ngram data file \'' . $ngram . '\'.'); 
@@ -104,9 +111,41 @@ class Filesystem implements StorageAdapterInterface
         }
     }
 
-    public function getNgramData(string $index_name, string $ngram) : array
+    public function queryIndex(string $name, array $ngrams, int $max_count = NULL, int $min_hits = NULL) : array
     {
-        $index_path = $this->storage_path . '/' . $index_name;
+        $raw_counts = array_count_values(array_reduce(
+            $ngrams,
+            function($carry, $ngram) use ($name) {
+                return array_merge(
+                    $carry, 
+                    $this->getNgramData($name, $ngram)
+                );
+            },
+            []   
+        )); 
+        arsort($raw_counts);
+        $return_arr = [];
+        foreach($raw_counts as $id => $count) {
+            if($min_hits !== NULL && $count < $min_hits) {
+                continue;
+            }
+            $key_value_pair = $this->getKeyValuePair($name, $id);
+            $return_arr[] = [
+                'id' => $id,
+                'key' => $key_value_pair[0],
+                'value' => $key_value_pair[1],
+                'ngrams_hit' => $count
+            ];
+            if($max_count !== NULL && count($return_arr) === $max_count) {
+                return $return_arr;
+            }
+        }
+        return $return_arr;  
+    }
+
+    protected function getNgramData(string $name, string $ngram) : array
+    {
+        $index_path = $this->storage_path . '/' . $name;
         if (!file_exists($index_path) || !is_dir($index_path)) {
             throw new IndexNotFoundException('Index \'' . $name . '\' not found.');  
         }
@@ -122,9 +161,9 @@ class Filesystem implements StorageAdapterInterface
         );
     } 
 
-    public function getKeyValuePair(string $index_name, int $id) : array
+    protected function getKeyValuePair(string $name, int $id) : array
     {
-        $values_file = new \SplFileObject($this->storage_path . '/' . $index_name . '/key_value_pairs.txt', 'r');
+        $values_file = new \SplFileObject($this->storage_path . '/' . $name . '/key_value_pairs.txt', 'r');
         $values_file->seek($id - 1);
         return array_map(
             function ($item) {
@@ -132,13 +171,6 @@ class Filesystem implements StorageAdapterInterface
             },
             preg_split('/;|\|/', $values_file->current())
         );
-    }
-
-    public function getIndexSize(string $index_name) : int
-    {
-        $values_file = new \SplFileObject($this->storage_path . '/' . $index_name . '/key_value_pairs.txt', 'r');
-        $values_file->seek(PHP_INT_MAX);
-        return $values_file->key();
     }
 
     protected function rrmdir($dir) { 
@@ -181,9 +213,9 @@ class Filesystem implements StorageAdapterInterface
     }
 
     /*
-    public function removeFromIndex(string $index_name, string $value_to_remove) : bool
+    public function removeFromIndex(string $name, string $value_to_remove) : bool
     {   
-        $index_path = $this->storage_path . '/' . $index_name;
+        $index_path = $this->storage_path . '/' . $name;
         if (!file_exists($index_path) || !is_dir($index_path)) {
             $this->last_error = self::ERROR_INDEX_NOT_FOUND; 
             return false;

@@ -3,16 +3,15 @@ namespace NgramSearch\RequestHandler\QueryIndex;
 
 use NgramSearch\Preparer;
 use NgramSearch\Ngrams;
-use NgramSearch\NgramIndex;
 
 function run(array $vars = []) : void 
 {
+    $time_start = microtime(true);
     $min_hits = (!empty($_GET['min_hits'])) ? $_GET['min_hits'] : 2; 
     $max_results = (!empty($_GET['max_results'])) ? $_GET['max_results'] : 20;
 
-    try {
-        $index = new NgramIndex($vars['index_name'], get_storage_adapter()); 
-    } catch (\InvalidArgumentException $e) {
+    $storage_adapter = get_storage_adapter();
+    if(!$storage_adapter->indexExists($vars['index_name'])) {
         set_header("HTTP/1.1 400 Bad Request"); 
         set_header('Content-type: application/vnd.api+json');
         echo json_encode(
@@ -29,8 +28,13 @@ function run(array $vars = []) : void
         ); 
         return;
     }
-    $time_start = microtime(true);
-    $query_res = $index->query($vars['query_string'], $max_results, $min_hits);
+    $ngrams = Ngrams::extract(Preparer::get($vars['query_string'], false));
+    $query_res = $storage_adapter->queryIndex(
+        $vars['index_name'], 
+        $ngrams, 
+        $max_results, 
+        $min_hits
+    );
     $time_end = microtime(true);
     $duration = $time_end - $time_start;
     set_header("HTTP/1.1 200 OK"); 
@@ -39,6 +43,7 @@ function run(array $vars = []) : void
     [
         'data' => prepare_result($query_res, $vars['query_string']),
         'meta' => [
+            'search_ngrams' => $ngrams,
             'result_length' => min(50, count($query_res)),
             'duration' => $duration,
             'peak_memory' => (memory_get_peak_usage(false)/1000/1000) . 'MB'

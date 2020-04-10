@@ -108,37 +108,6 @@ class StorageAdapterFilesystemTest extends TestCase {
     /**
      * @depends testAddToIndex
      */
-    public function testGetNgramData() : void
-    {
-        $storage_adapter = get_storage_adapter();
-        $storage_adapter->createIndex('MyIndex');
-        $storage_adapter->addToIndex('MyIndex', 'ab;foo');
-        $storage_adapter->addToIndex('MyIndex', 'ab;bar');
-        $storage_adapter->addToIndex('MyIndex', 'ab;baz');
-        $data = $storage_adapter->getNgramData('MyIndex', 'ab');
-        $this->assertSame(3, count($data));
-        $this->assertSame(1, $data[0]);
-        $this->assertSame(2, $data[1]);
-        $this->assertSame(3, $data[2]);
-    }
-
-    /**
-     * @depends testAddToIndex
-     */
-    public function testGetKeyValuePair() : void
-    {
-        $storage_adapter = get_storage_adapter();
-        $storage_adapter->createIndex('MyIndex');
-        $storage_adapter->addToIndex('MyIndex', 'ab;foo');
-        $this->assertSame(
-            ['ab', 'foo'],
-            $storage_adapter->getKeyValuePair('MyIndex', 1)
-        );
-    }
-    
-    /**
-     * @depends testAddToIndex
-     */
     public function testFlushIndex() : void
     {
         $storage_adapter = get_storage_adapter();
@@ -163,5 +132,51 @@ class StorageAdapterFilesystemTest extends TestCase {
         $this->expectException(IndexNotFoundException::class);
         $storage_adapter = get_storage_adapter();
         $storage_adapter->flushIndex('DoesNotExist');  
+    }
+
+    /**
+     * @depends testAddToIndex
+     */
+    public function testQueryIndex() : void
+    {
+        $test_ngram_data = [
+            ' a' => [1, 2, 3],
+            'ab' => [1, 2, 3],
+            'bc' => [1, 2],
+            'cd' => [1],
+            'b ' => [3],
+            'c ' => [2],
+            'd ' => [1]
+        ];
+        $test_key_value_pairs = [
+            'abcd;foo',
+            'abc;bar',
+            'ab;baz',
+        ];
+        generateTestData('MyIndex', $test_ngram_data, $test_key_value_pairs);
+        $storage_adapter = get_storage_adapter();
+        $this->assertSame(
+            [
+                [
+                    'id' => 1,
+                    'key' => 'abcd',
+                    'value' => 'foo',
+                    'ngrams_hit' => 5
+                ],
+                [
+                    'id' => 2,
+                    'key' => 'abc',
+                    'value' => 'bar',
+                    'ngrams_hit' => 3
+                ],
+                [
+                    'id' => 3,
+                    'key' => 'ab',
+                    'value' => 'baz',
+                    'ngrams_hit' => 2
+                ],
+            ],
+            $storage_adapter->queryIndex('MyIndex', [' a', 'ab', 'bc', 'cd', 'd '])
+        ); 
     }
 }

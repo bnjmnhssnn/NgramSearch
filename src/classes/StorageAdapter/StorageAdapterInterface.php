@@ -13,7 +13,5 @@ interface StorageAdapterInterface
 
     public function addToIndex(string $index_name, string $value_to_store) : void;
 
-    public function getNgramData(string $index_name, string $ngram) : array; 
-
-    public function getKeyValuePair(string $index_name, int $id) : array; 
+    public function queryIndex(string $index_name, array $ngrams, int $max_count, int $min_hits) : array;
 }

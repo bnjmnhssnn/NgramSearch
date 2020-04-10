@@ -16,7 +16,6 @@
             <file>tests/StorageAdapterFilesystemTest.php</file>
             <file>tests/PreparerTest.php</file>
             <file>tests/NgramsTest.php</file>
-            <file>tests/NgramIndexTest.php</file>
             <file>tests/RequestValidatorTest.php</file>
         </testsuite>
         <testsuite name="handler">
@@ -35,7 +34,6 @@
             <file>tests/StorageAdapterFilesystemTest.php</file>
             <file>tests/PreparerTest.php</file>
             <file>tests/NgramsTest.php</file>
-            <file>tests/NgramIndexTest.php</file>
             <file>tests/RequestValidatorTest.php</file>
             <file>tests/RequestHandlerApiInfoTest.php</file>
             <file>tests/RequestHandlerCreateIndexTest.php</file>
